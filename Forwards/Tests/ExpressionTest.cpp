@@ -1396,6 +1396,17 @@ TEST(EngineTests, testFunctionsAndRanges)
    EXPECT_EQ(context.topCell(), casted->topCell());
    EXPECT_EQ(context.theSheet, casted->theSheet);
    EXPECT_EQ(context.logger, casted->logger);
+
+
+   std::shared_ptr<Forwards::Engine::Constant> one = std::make_shared<Forwards::Engine::Constant>(Forwards::Input::Token(), makeFloatValue(6.0));
+   std::shared_ptr<Forwards::Engine::Constant> two = std::make_shared<Forwards::Engine::Constant>(Forwards::Input::Token(), makeFloatValue(9.0));
+   args.clear();
+   args.emplace_back(std::make_shared<Forwards::Engine::Plus>(Forwards::Input::Token(), one, two));
+   std::shared_ptr<Forwards::Engine::FunctionCall> funTestParens = std::make_shared<Forwards::Engine::FunctionCall>(
+      Forwards::Input::Token(Forwards::Input::IDENTIFIER, "ARG", 1U),
+      std::make_shared<Backwards::Engine::Variable>(Backwards::Input::Token(), map["ARG"]),
+      args);
+   EXPECT_EQ("@ARG(6+9)", funTestParens->toString(0U, 0U, 5));
  }
 
 TEST(EngineTests, testCellRangeExpand)
