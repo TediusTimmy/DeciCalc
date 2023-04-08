@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include <iostream>
 #include <functional>
+#include <algorithm>
 
 #include "Backwards/Input/Lexer.h"
 #include "Backwards/Input/LineBufferedStreamInput.h"
