@@ -203,6 +203,7 @@ namespace Engine
        }
       catch (...)
        {
+         context.topCell()->cell->inEvaluation = false;
          context.popCell();
          throw;
        }
