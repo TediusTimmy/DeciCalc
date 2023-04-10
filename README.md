@@ -15,7 +15,7 @@ So, I made a spreadsheet program to do simple things with money. Mostly, I want 
 How To Build
 ------------
 
-Sorry: this is a pain in the butt. First, get the libdecmath repo and use `Make.sh` to build the static library. Then, build Backwards and Forwards with their `Make.sh` scripts. They will expect that you checked out libdecmath and DeciCalc into the same directory, with libdecmath having its default name. Now, place the three static libraries into `Curses/lib`, and use the `Make.sh` script there to build the application.
+First, get the libdecmath repo and put it at the same level as you have the DeciCalc checkout, with the name `libdecmath`. Then, run `make` to make a `DeciCalc.exe` binary. I know that this isn't a convention on Linux, but I am not good enough at Makefiles to change it.
 
 The standard library is in `OddsAndEnds/StandardLibrary.cpp` if you so feel the need to change it. Yes, I ate my own dogfood and implemented it in Backwards. So, this backwards has had everything that uses transcendental functions removed: powers, pi, and trig functions. SlowFloat uses the binary functions for these, as 53 bits of precision is more than nine digits. However, it is arguable if 53 bits will always give sixteen digits of precision. As it is important to me that the program never lies about the precision of a result, so I removed them. This also means that I don't have to research algorithms to compute them (though, I really should do that for square root anyway). In general, if you want to do those sorts of operations, binary would serve you better anyway, and Gnumeric is a superior tool. This program has a very specific niche.
 
