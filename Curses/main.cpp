@@ -94,6 +94,7 @@ int main (int argc, char ** argv)
    state.left_right = true;
 
    state.inputMode = false;
+   state.useComma = false;
 
    state.def_col_width = 9;
 

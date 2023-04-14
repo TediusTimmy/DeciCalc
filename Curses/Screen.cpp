@@ -94,6 +94,21 @@ void GetRC(const std::string& from, int64_t& col, int64_t& row)
     }
  }
 
+std::string setComma(const std::string& str, bool useComma)
+ {
+   std::string result = str;
+   if (true == useComma)
+    {
+      size_t c = result.find('.');
+      while (std::string::npos != c)
+       {
+         result[c] = ',';
+         c = result.find('.', c);
+       }
+    }
+   return result;
+ }
+
 void InitScreen(void)
  {
    initscr();
@@ -140,6 +155,7 @@ void UpdateScreen(SharedData& data)
          if (nullptr != curCell->previousValue)
           {
             std::string content = curCell->previousValue->toString(data.c_col, data.c_row);
+            if (Forwards::Engine::VALUE == curCell->type) content = setComma(content, data.useComma);
             if (content.size() > static_cast<size_t>(x - 22)) content = content.substr(0U, x - 22);
             printw("%s", content.c_str());
             for (int i = (x - 21 - content.size()); i > 0; --i) addch(' ');
@@ -179,7 +195,7 @@ void UpdateScreen(SharedData& data)
          if ((Forwards::Engine::VALUE == curCell->type) && (nullptr == curCell->value))
           {
             data.context->inUserInput = true;
-            std::string content = computeCell(*data.context, *data.map, curCell, data.c_col, data.c_row);
+            std::string content = setComma(computeCell(*data.context, *data.map, curCell, data.c_col, data.c_row), data.useComma);
             if (content.size() > static_cast<size_t>(x - 1)) content = content.substr(0U, x - 1);
             printw("%s", content.c_str());
             for (int i = (x - content.size()); i > 0; --i) addch(' ');
@@ -188,6 +204,7 @@ void UpdateScreen(SharedData& data)
          else if (nullptr != curCell->value)
           {
             std::string content = curCell->value->toString(data.c_col, data.c_row);
+            if (Forwards::Engine::VALUE == curCell->type) content = setComma(content, data.useComma);
             if (content.size() > static_cast<size_t>(x - 1)) content = content.substr(0U, x - 1);
             printw("%s", content.c_str());
             for (int i = (x - content.size()); i > 0; --i) addch(' ');
@@ -228,6 +245,7 @@ void UpdateScreen(SharedData& data)
             if (nullptr != curCell->value.get())
              {
                std::string content = curCell->value->toString(data.c_col, data.c_row);
+               if (Forwards::Engine::VALUE == curCell->type) content = setComma(content, data.useComma);
                if (content.size() > static_cast<size_t>(x - 1)) content = content.substr(0U, x - 1);
                printw("%s", content.c_str());
                for (int i = (x - content.size()); i > 0; --i) addch(' ');
@@ -327,6 +345,7 @@ void UpdateScreen(SharedData& data)
                if (nullptr != curCell->previousValue)
                 {
                   std::string content = curCell->previousValue->toString(data.c_col, data.c_row);
+                  if (Forwards::Engine::VALUE == curCell->type) content = setComma(content, data.useComma);
                   if (content.size() > static_cast<size_t>(nextWidth))
                    {
                      if (Forwards::Types::FLOAT == curCell->previousValue->getType()) // Make numbers note that they are truncated.
@@ -421,6 +440,8 @@ int ProcessInput(SharedData& data)
        {
          Forwards::Engine::Cell* curCell = getCellAt(data.context->theSheet, data.c_col, data.c_row);
          curCell->currentInput += c;
+         if ('.' == c) data.useComma = false;
+         if (',' == c) data.useComma = true;
        }
       else if ((c == KEY_BACKSPACE) || (c == '\b') || (c == 0177))
        {

@@ -47,6 +47,7 @@ public:
    bool left_right;
 
    bool inputMode;
+   bool useComma;
 
    size_t def_col_width;
    std::map<size_t, int> col_widths;
