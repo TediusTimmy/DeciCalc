@@ -46,15 +46,19 @@ Commands
 * < : start entering a label in this cell. Finish by pressing enter.
 * = : start entering a formula in this cell. Finish by pressing enter.
 * q or F7 : exit. You must next press either 'y' to save and exit, or 'n' to not save and exit to actually exit.
-* ! : recalculate the sheet (sometimes, you need to do this after loading saved data)
+* ! : recalculate the sheet
 * W : save the sheet
 * d : delete the current cell
 * y : copy the current cell
 * p : paste the current cell
 * e : edit the current cell's contents
 * Shift left/right (also F9/F12 because ... Windows) : widen or narrow the current column. Columns can be between 1 and 40 cells wide. This is not a saved setting.
+* # : Switch between column-major and row-major recalculation.
+* $ : Switch between top-to-bottom and bottom-to-top recalculation.
+* % : Switch between left-to-right and right-to-left recalculation.
+* , : Toggle between using ',' and '.' as the decimal separator. This is not a saved setting.
 
-The sheet automatically recalculates after you finish entering a label or formula, and when you paste a cell. If a cell references a cell that hasn't been computed yet, then that cell will be computed, unless we are already in the process of computing that cell (circular reference). This ought to remove most of the reasons for wanting to change the order of sheet computation.
+The sheet automatically recalculates after you finish entering a label or formula, and when you paste a cell. If a cell references a cell that hasn't been computed yet, then that cell will be computed, unless we are already in the process of computing that cell (circular reference). This ought to remove most of the reasons for wanting to change the order of sheet computation (but, if you feel the need, it is very customizable).
 
 
 Formula Language
@@ -63,7 +67,7 @@ Formula Language
 Examples:  
 `A$1+@SUM(C2:D3)+4/7`
 
-Cell references are like `A1` or `$B$2`. Anchoring row or column with '$' only matters when you copy/paste cells. Functions start with '@' like in DOS spreadsheet applications; their arguments are separated by semicolons (';'). Ranges use the colon (':'). You can do comparisons with '=', '>=', '<=', '>', '>', or '<>': the result is 1.0 for true and 0.0 for false. Use '&' to concatenate the string representations of two cells.
+Cell references are like `A1` or `$B$2`. Anchoring row or column with '$' only matters when you copy/paste cells. Functions start with '@' like in DOS spreadsheet applications; their arguments are separated by semicolons (';'). Ranges use the colon (':'). You can do comparisons with '=', '>=', '<=', '>', '>', or '<>': the result is 1.0 for true and 0.0 for false. Use '&' to concatenate the string representations of two cells. The only half-attempt at internationalization that is supported is that 12,5 and 12.5 are treated the same. When you type a comma on numeric input, all of the numeric outputs will change to displaying a comma.
 
 
 Standard Library

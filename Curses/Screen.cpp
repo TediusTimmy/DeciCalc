@@ -653,6 +653,18 @@ int ProcessInput(SharedData& data)
    case KEY_SRIGHT:
       incWidth(data.col_widths, data.c_col, data.def_col_width);
       break;
+   case '#':
+      data.context->theSheet->c_major = !data.context->theSheet->c_major;
+      break;
+   case '$':
+      data.context->theSheet->top_down = !data.context->theSheet->top_down;
+      break;
+   case '%':
+      data.context->theSheet->left_right = !data.context->theSheet->left_right;
+      break;
+   case ',':
+      data.useComma = !data.useComma;
+      break;
     }
 
    return returnValue;

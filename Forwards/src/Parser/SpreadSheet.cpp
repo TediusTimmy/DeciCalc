@@ -248,18 +248,50 @@ namespace Engine
           {
             if (left_right) // Going from left-to-right
              {
+               for (size_t row = 0U; row < max_row; ++row)
+                {
+                  for (size_t col = 0U; col < sheet.size(); ++col)
+                   {
+                     std::shared_ptr<Types::ValueType> trash;
+                     (void) computeCell(context, trash, col, row, false);
+                   }
+                }
              }
             else // Going from right-to-left
              {
+               for (size_t row = max_row - 1U; row != ~0U; --row)
+                {
+                  for (size_t col = 0U; col < sheet.size(); ++col)
+                   {
+                     std::shared_ptr<Types::ValueType> trash;
+                     (void) computeCell(context, trash, col, row, false);
+                   }
+                }
              }
           }
          else // Going from bottom-to-top
           {
             if (left_right) // Going from left-to-right
              {
+               for (size_t row = 0U; row < max_row; ++row)
+                {
+                  for (size_t col = sheet.size() - 1U; col != ~0U; --col)
+                   {
+                     std::shared_ptr<Types::ValueType> trash;
+                     (void) computeCell(context, trash, col, row, false);
+                   }
+                }
              }
             else // Going from right-to-left
              {
+               for (size_t row = max_row - 1U; row != ~0U; --row)
+                {
+                  for (size_t col = sheet.size() - 1U; col != ~0U; --col)
+                   {
+                     std::shared_ptr<Types::ValueType> trash;
+                     (void) computeCell(context, trash, col, row, false);
+                   }
+                }
              }
           }
        }
