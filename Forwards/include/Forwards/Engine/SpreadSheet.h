@@ -32,18 +32,44 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef FORWARDS_ENGINE_SPREADSHEET_H
 #define FORWARDS_ENGINE_SPREADSHEET_H
 
+#include <vector>
+#include <memory>
+
 namespace Forwards
  {
+
+namespace Types
+ {
+   class ValueType;
+ }
 
 namespace Engine
  {
 
+   class CallingContext;
    class Cell;
 
    class SpreadSheet final
     {
    public:
+      SpreadSheet();
+      SpreadSheet(const SpreadSheet&) = delete;
+      SpreadSheet& operator=(const SpreadSheet&) = delete;
+
       std::vector<std::vector<std::unique_ptr<Cell> > > sheet;
+
+      size_t max_row;
+
+      bool c_major;
+      bool top_down;
+      bool left_right;
+
+      Cell* getCellAt(size_t col, size_t row);
+      void initCellAt(size_t col, size_t row);
+      void removeCellAt(size_t col, size_t row);
+
+      std::string computeCell(CallingContext&, std::shared_ptr<Types::ValueType>& OUT, size_t col, size_t row, bool rethrow);
+      void recalc(CallingContext&);
     };
 
  } // namespace Engine

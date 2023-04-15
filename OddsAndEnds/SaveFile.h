@@ -33,6 +33,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SAVEFILE_H
 
 void SaveFile(const std::string& fileName, Forwards::Engine::SpreadSheet*);
-size_t LoadFile(const std::string& fileName, Forwards::Engine::SpreadSheet*);
+void LoadFile(const std::string& fileName, Forwards::Engine::SpreadSheet*);
 
 #endif /* SAVEFILE_H */

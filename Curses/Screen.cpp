@@ -140,7 +140,7 @@ void UpdateScreen(SharedData& data)
       printw("%s", location.c_str());
       for (int i = 12 - location.size(); i > 0; --i) addch(' ');
       addch(' ');
-      Forwards::Engine::Cell* curCell = getCellAt(data.context->theSheet, data.c_col, data.c_row);
+      Forwards::Engine::Cell* curCell = data.context->theSheet->getCellAt(data.c_col, data.c_row);
       if (nullptr != curCell)
        {
          if (Forwards::Engine::VALUE == curCell->type)
@@ -175,27 +175,33 @@ void UpdateScreen(SharedData& data)
        {
          for (int i = x - 15; i > 0; --i) addch(' ');
        }
-      if (data.c_major)
+      if (data.context->theSheet->c_major)
        {
-         addch(data.top_down ? 'T' : 'B');
-         addch(data.left_right ? 'L' : 'R');
+         addch(data.context->theSheet->top_down ? 'T' : 'B');
+         addch(data.context->theSheet->left_right ? 'L' : 'R');
        }
       else
        {
-         addch(data.left_right ? 'L' : 'R');
-         addch(data.top_down ? 'T' : 'B');
+         addch(data.context->theSheet->left_right ? 'L' : 'R');
+         addch(data.context->theSheet->top_down ? 'T' : 'B');
        }
     }
          // Line 2
     {
-      Forwards::Engine::Cell* curCell = getCellAt(data.context->theSheet, data.c_col, data.c_row);
+      Forwards::Engine::Cell* curCell = data.context->theSheet->getCellAt(data.c_col, data.c_row);
       if (nullptr != curCell)
        {
             // unfinished VALUE
          if ((Forwards::Engine::VALUE == curCell->type) && (nullptr == curCell->value))
           {
             data.context->inUserInput = true;
-            std::string content = setComma(computeCell(*data.context, *data.map, curCell, data.c_col, data.c_row), data.useComma);
+            std::shared_ptr<Forwards::Types::ValueType> result;
+            std::string content = data.context->theSheet->computeCell(*data.context, result, data.c_col, data.c_row, false);
+            if (nullptr != result.get())
+             {
+               content = result->toString(data.c_col, data.c_row);
+             }
+            content = setComma(content, data.useComma);
             if (content.size() > static_cast<size_t>(x - 1)) content = content.substr(0U, x - 1);
             printw("%s", content.c_str());
             for (int i = (x - content.size()); i > 0; --i) addch(' ');
@@ -226,7 +232,7 @@ void UpdateScreen(SharedData& data)
          // Line 3
     {
       attron(COLOR_PAIR(1));
-      Forwards::Engine::Cell* curCell = getCellAt(data.context->theSheet, data.c_col, data.c_row);
+      Forwards::Engine::Cell* curCell = data.context->theSheet->getCellAt(data.c_col, data.c_row);
       if (nullptr != curCell)
        {
          if (true == data.inputMode)
@@ -339,7 +345,7 @@ void UpdateScreen(SharedData& data)
                attron(COLOR_PAIR(1));
              }
             cx += nextWidth;
-            Forwards::Engine::Cell* curCell = getCellAt(data.context->theSheet, cc, cr);
+            Forwards::Engine::Cell* curCell = data.context->theSheet->getCellAt(cc, cr);
             if (nullptr != curCell)
              {
                if (nullptr != curCell->previousValue)
@@ -433,19 +439,21 @@ int ProcessInput(SharedData& data)
    getmaxyx(stdscr, y, x); // CODING HORROR!!!
 
    size_t tc = CountColumns(data, data.tr_col, x);
+   Forwards::Engine::Cell* curCell = data.context->theSheet->getCellAt(data.c_col, data.c_row);
 
    if (true == data.inputMode)
     {
       if ((c >= ' ') && (c <= '~'))
        {
-         Forwards::Engine::Cell* curCell = getCellAt(data.context->theSheet, data.c_col, data.c_row);
          curCell->currentInput += c;
-         if ('.' == c) data.useComma = false;
-         if (',' == c) data.useComma = true;
+         if (Forwards::Engine::VALUE == curCell->type)
+          {
+            if ('.' == c) data.useComma = false;
+            if (',' == c) data.useComma = true;
+          }
        }
       else if ((c == KEY_BACKSPACE) || (c == '\b') || (c == 0177))
        {
-         Forwards::Engine::Cell* curCell = getCellAt(data.context->theSheet, data.c_col, data.c_row);
          if ("" != curCell->currentInput)
           {
             if (curCell->currentInput.size() > 1U)
@@ -461,7 +469,7 @@ int ProcessInput(SharedData& data)
       else if ((c == '\n') || (c == '\r') || (c == KEY_ENTER))
        {
          data.inputMode = false;
-         recalc(*data.context, *data.map, data.c_major, data.top_down, data.left_right, data.max_row);
+         data.context->theSheet->recalc(*data.context);
        }
       return returnValue;
     }
@@ -551,12 +559,10 @@ int ProcessInput(SharedData& data)
       break;
    case '<':
     {
-      Forwards::Engine::Cell* curCell = getCellAt(data.context->theSheet, data.c_col, data.c_row);
       if (nullptr == curCell)
        {
-         initCellAt(data.context->theSheet, data.c_col, data.c_row);
-         curCell = getCellAt(data.context->theSheet, data.c_col, data.c_row);
-         if (data.c_row > data.max_row) data.max_row = data.c_row;
+         data.context->theSheet->initCellAt(data.c_col, data.c_row);
+         curCell = data.context->theSheet->getCellAt(data.c_col, data.c_row);
        }
       curCell->type = Forwards::Engine::LABEL;
       curCell->currentInput = "";
@@ -566,12 +572,10 @@ int ProcessInput(SharedData& data)
       break;
    case '=':
     {
-      Forwards::Engine::Cell* curCell = getCellAt(data.context->theSheet, data.c_col, data.c_row);
       if (nullptr == curCell)
        {
-         initCellAt(data.context->theSheet, data.c_col, data.c_row);
-         curCell = getCellAt(data.context->theSheet, data.c_col, data.c_row);
-         if (data.c_row > data.max_row) data.max_row = data.c_row;
+         data.context->theSheet->initCellAt(data.c_col, data.c_row);
+         curCell = data.context->theSheet->getCellAt(data.c_col, data.c_row);
        }
       curCell->type = Forwards::Engine::VALUE;
       curCell->currentInput = "";
@@ -593,18 +597,18 @@ int ProcessInput(SharedData& data)
        }
       break;
    case '!':
-      recalc(*data.context, *data.map, data.c_major, data.top_down, data.left_right, data.max_row);
+      data.context->theSheet->recalc(*data.context);
       break;
    case 'd':
       if ('d' == getch())
        {
-         removeCellAt(data.context->theSheet, data.c_col, data.c_row);
+         data.context->theSheet->removeCellAt(data.c_col, data.c_row);
+         data.context->theSheet->recalc(*data.context);
        }
       break;
    case 'y':
       if ('y' == getch())
        {
-         Forwards::Engine::Cell* curCell = getCellAt(data.context->theSheet, data.c_col, data.c_row);
          if ((nullptr != curCell) && (nullptr != curCell->value.get()))
           {
             data.yankedType = curCell->type;
@@ -615,21 +619,18 @@ int ProcessInput(SharedData& data)
    case 'p':
       if ('p' == getch())
        {
-         Forwards::Engine::Cell* curCell = getCellAt(data.context->theSheet, data.c_col, data.c_row);
          if (nullptr == curCell)
           {
-            initCellAt(data.context->theSheet, data.c_col, data.c_row);
-            curCell = getCellAt(data.context->theSheet, data.c_col, data.c_row);
-            if (data.c_row > data.max_row) data.max_row = data.c_row;
+            data.context->theSheet->initCellAt(data.c_col, data.c_row);
+            curCell = data.context->theSheet->getCellAt(data.c_col, data.c_row);
           }
          curCell->type = data.yankedType;
          curCell->value = data.yanked;
-         recalc(*data.context, *data.map, data.c_major, data.top_down, data.left_right, data.max_row);
+         data.context->theSheet->recalc(*data.context);
        }
       break;
    case 'e':
     {
-      Forwards::Engine::Cell* curCell = getCellAt(data.context->theSheet, data.c_col, data.c_row);
       if (nullptr != curCell)
        {
          if (("" == curCell->currentInput) && (nullptr != curCell->value.get()))

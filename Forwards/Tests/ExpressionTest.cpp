@@ -1274,7 +1274,8 @@ TEST(EngineTests, testFunctionsAndRanges)
    context.pushCell(&frame);
 
 
-   Forwards::Parser::GetterMap map;
+   Forwards::Engine::GetterMap map;
+   //context.map = &map;
 
    Backwards::Engine::Scope global;
    context.globalScope = &global;

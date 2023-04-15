@@ -39,13 +39,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Forwards/Engine/Expression.h"
 
 #include "Forwards/Parser/Parser.h"
+#include "Forwards/Parser/StringLogger.h"
 
 #include "Forwards/Types/ValueType.h"
 
 #include "GetAndSet.h"
 #include "LibraryLoader.h"
 #include "SaveFile.h"
-#include "StringLogger.h"
 
 #include "Screen.h"
 
@@ -54,15 +54,14 @@ int main (int argc, char ** argv)
    Forwards::Engine::CallingContext context;
    Backwards::Engine::Scope global;
    context.globalScope = &global;
-   StringLogger logger;
+   Forwards::Parser::StringLogger logger;
    context.logger = &logger;
    Forwards::Engine::SpreadSheet sheet;
    context.theSheet = &sheet;
+   Forwards::Engine::GetterMap map;
+   context.map = &map;
 
-   Forwards::Parser::GetterMap map;
-
-   int file = LoadLibraries(argc, argv, context, map);
-   size_t temp = 0U;
+   int file = LoadLibraries(argc, argv, context);
 
    std::string saveFileName = "untitled.html";
    if (file < argc)
@@ -76,7 +75,7 @@ int main (int argc, char ** argv)
          saveFileName = argv[file];
        }
 
-      temp = LoadFile(argv[file], &sheet);
+      LoadFile(argv[file], &sheet);
     }
 
    SharedData state;
@@ -87,12 +86,6 @@ int main (int argc, char ** argv)
    state.tr_row = 0U;
    state.tr_col = 0U;
 
-   state.max_row = temp;
-
-   state.c_major = true;
-   state.top_down = true;
-   state.left_right = true;
-
    state.inputMode = false;
    state.useComma = false;
 
@@ -101,14 +94,13 @@ int main (int argc, char ** argv)
    state.yankedType = Forwards::Engine::ERROR;
 
    state.context = &context;
-   state.map = &map;
 
    state.saveRequested = false;
 
 
-   if (0U != temp) // We loaded saved data, so recalculate the sheet.
+   if (0U != sheet.max_row) // We loaded saved data, so recalculate the sheet.
     {
-      recalc(context, map, true, true, true, temp);
+      sheet.recalc(context);
     }
 
 

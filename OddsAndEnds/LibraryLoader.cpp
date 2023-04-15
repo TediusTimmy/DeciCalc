@@ -47,15 +47,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Forwards/Engine/CallingContext.h"
 #include "Forwards/Parser/Parser.h"
+#include "Forwards/Parser/StringLogger.h"
 
 #include "StdLib.h"
-#include "StringLogger.h"
 
 static void dumpLog(Backwards::Engine::Logger& logger)
  {
    try
     {
-      StringLogger& realLogger = dynamic_cast<StringLogger&>(logger);
+      Forwards::Parser::StringLogger& realLogger = dynamic_cast<Forwards::Parser::StringLogger&>(logger);
       if (false == realLogger.logs.empty())
        {
          std::cerr << "These messages were logged:" << std::endl;
@@ -72,7 +72,7 @@ static void dumpLog(Backwards::Engine::Logger& logger)
     }
  }
 
-int LoadLibraries (int argc, char ** argv, Forwards::Engine::CallingContext& context, Forwards::Parser::GetterMap& map)
+int LoadLibraries (int argc, char ** argv, Forwards::Engine::CallingContext& context)
  {
    Backwards::Parser::ContextBuilder::createGlobalScope(*context.globalScope); // Create the global scope before the table.
    Backwards::Parser::GetterSetter gs;
@@ -139,7 +139,7 @@ int LoadLibraries (int argc, char ** argv, Forwards::Engine::CallingContext& con
       std::transform(temp.begin(), temp.end(), temp.begin(), [](unsigned char c){ return std::toupper(c); });
       if (name == temp)
        {
-         map.insert(std::make_pair(name, table.getVariableGetter(name)));
+         context.map->insert(std::make_pair(name, table.getVariableGetter(name)));
        }
     }
 

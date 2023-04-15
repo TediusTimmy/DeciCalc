@@ -157,19 +157,17 @@ namespace Engine
          constructMessage("Invalid cell reference", token);
        }
 
+      Cell* cell = context.theSheet->getCellAt(col, row);
          // If positive overflow or no data, Nil.
-      if ((col >= static_cast<int64_t>(context.theSheet->sheet.size())) ||
-          (row >= static_cast<int64_t>(context.theSheet->sheet[col].size())) ||
-          (nullptr == context.theSheet->sheet[col][row].get()) ||
-          (nullptr == context.theSheet->sheet[col][row]->value.get()))
+      if (nullptr == cell)
        {
          return std::make_shared<Types::NilValue>();
        }
 
          // If we are currently evaluating this cell, stop.
-      if (true == context.theSheet->sheet[col][row]->inEvaluation)
+      if (true == cell->inEvaluation)
        {
-         std::shared_ptr<Types::ValueType> result = context.theSheet->sheet[col][row]->previousValue;
+         std::shared_ptr<Types::ValueType> result = cell->previousValue;
          if (nullptr == result.get())
           {
             result = std::make_shared<Types::NilValue>();
@@ -178,35 +176,19 @@ namespace Engine
        }
 
          // If we have already evaluated this cell this generation, stop.
-      if (context.generation == context.theSheet->sheet[col][row]->previousGeneration)
+      if (context.generation == cell->previousGeneration)
        {
-         return context.theSheet->sheet[col][row]->previousValue;
+         return cell->previousValue;
        }
 
          // Guess we need to do work.
-      CellFrame newFrame (context.theSheet->sheet[col][row].get(), col, row);
-      try
+      std::shared_ptr<Types::ValueType> result;
+      (void) context.theSheet->computeCell(context, result, col, row, true);
+      if (nullptr == result.get())
        {
-         context.pushCell(&newFrame);
-            // Evaluate the new cell.
-         context.topCell()->cell->inEvaluation = true;
-         std::shared_ptr<Types::ValueType> result = context.topCell()->cell->value->evaluate(context);
-         context.topCell()->cell->inEvaluation = false;
-            // If we are doing regular evaluation passes, set this as the current value.
-         if (false == context.inUserInput)
-          {
-            context.topCell()->cell->previousGeneration = context.generation;
-            context.topCell()->cell->previousValue = result;
-          }
-         context.popCell();
-         return result;
+         result = std::make_shared<Types::NilValue>();
        }
-      catch (...)
-       {
-         context.topCell()->cell->inEvaluation = false;
-         context.popCell();
-         throw;
-       }
+      return result;
     }
 
 

@@ -139,7 +139,7 @@ obj/Backwards/ValueType.o: Backwards/src/Types/ValueType.cpp | obj/Backwards
 	$(CCP) $(CFLAGS) $(B_INCLUDE) -c -o obj/Backwards/ValueType.o Backwards/src/Types/ValueType.cpp
 
 
-lib/Forwards.a: obj/Forwards/CallingContext.o obj/Forwards/CellRangeExpand.o obj/Forwards/CellRefEval.o obj/Forwards/Expression.o obj/Forwards/Lexer.o obj/Forwards/Parser.o obj/Forwards/CellRangeValue.o obj/Forwards/CellRefValue.o obj/Forwards/FloatValue.o obj/Forwards/NilValue.o obj/Forwards/StringValue.o | lib
+lib/Forwards.a: obj/Forwards/CallingContext.o obj/Forwards/CellRangeExpand.o obj/Forwards/CellRefEval.o obj/Forwards/Expression.o obj/Forwards/Lexer.o obj/Forwards/Parser.o obj/Forwards/SpreadSheet.o obj/Forwards/CellRangeValue.o obj/Forwards/CellRefValue.o obj/Forwards/FloatValue.o obj/Forwards/NilValue.o obj/Forwards/StringValue.o | lib
 	ar -rsc lib/Forwards.a obj/Forwards/*.o
 
 obj/Forwards/CallingContext.o: Forwards/src/Engine/CallingContext.cpp | obj/Forwards
@@ -159,6 +159,9 @@ obj/Forwards/Lexer.o: Forwards/src/Input/Lexer.cpp | obj/Forwards
 
 obj/Forwards/Parser.o: Forwards/src/Parser/Parser.cpp | obj/Forwards
 	$(CCP) $(CFLAGS) $(F_INCLUDE) -c -o obj/Forwards/Parser.o Forwards/src/Parser/Parser.cpp
+
+obj/Forwards/SpreadSheet.o: Forwards/src/Parser/SpreadSheet.cpp | obj/Forwards
+	$(CCP) $(CFLAGS) $(F_INCLUDE) -c -o obj/Forwards/SpreadSheet.o Forwards/src/Parser/SpreadSheet.cpp
 
 obj/Forwards/CellRangeValue.o: Forwards/src/Types/CellRangeValue.cpp | obj/Forwards
 	$(CCP) $(CFLAGS) $(F_INCLUDE) -c -o obj/Forwards/CellRangeValue.o Forwards/src/Types/CellRangeValue.cpp

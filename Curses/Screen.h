@@ -40,12 +40,6 @@ public:
    size_t tr_col;
    size_t tr_row;
 
-   size_t max_row;
-
-   bool c_major;
-   bool top_down;
-   bool left_right;
-
    bool inputMode;
    bool useComma;
 
@@ -56,7 +50,6 @@ public:
    std::shared_ptr<Forwards::Engine::Expression> yanked;
 
    Forwards::Engine::CallingContext* context;
-   Forwards::Parser::GetterMap* map;
 
    bool saveRequested;
  };

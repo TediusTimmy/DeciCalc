@@ -29,8 +29,19 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef STRINGLOGGER_H
-#define STRINGLOGGER_H
+#ifndef FORWARDS_PARSER_STRINGLOGGER_H
+#define FORWARDS_PARSER_STRINGLOGGER_H
+
+#include <vector>
+#include <string>
+
+#include "Backwards/Engine/Logger.h"
+
+namespace Forwards
+ {
+
+namespace Parser
+ {
 
 class StringLogger final : public Backwards::Engine::Logger
  {
@@ -40,4 +51,8 @@ public:
    std::string get () { return ""; }
  };
 
-#endif /* STRINGLOGGER_H */
+ } // namespace Parser
+
+ } // namespace Forwards
+
+#endif /* FORWARDS_PARSER_STRINGLOGGER_H */

@@ -63,7 +63,7 @@ public:
 
 int main (int argc, char ** argv)
  {
-   Forwards::Parser::GetterMap map;
+   Forwards::Engine::GetterMap map;
 
    Backwards::Engine::Scope global;
    Backwards::Parser::ContextBuilder::createGlobalScope(global); // Create the global scope before the table.

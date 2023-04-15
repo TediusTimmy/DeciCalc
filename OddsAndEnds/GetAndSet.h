@@ -32,15 +32,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef GETANDSET_H
 #define GETANDSET_H
 
-Forwards::Engine::Cell* getCellAt(Forwards::Engine::SpreadSheet*, size_t col, size_t row);
-void initCellAt(Forwards::Engine::SpreadSheet*, size_t col, size_t row);
-void removeCellAt(Forwards::Engine::SpreadSheet*, size_t col, size_t row);
-
-std::string computeCell(Forwards::Engine::CallingContext&, Forwards::Parser::GetterMap&, Forwards::Engine::Cell*, size_t col, size_t row);
-void recalc(Forwards::Engine::CallingContext&, Forwards::Parser::GetterMap& map, bool c, bool t, bool l, size_t m);
-
-int getWidth(const std::map<size_t, int>& map, size_t col, int def);
-void incWidth(std::map<size_t, int>& map, size_t col, int def);
-void decWidth(std::map<size_t, int>& map, size_t col, int def);
+int getWidth(const std::map<std::size_t, int>& map, std::size_t col, int def);
+void incWidth(std::map<std::size_t, int>& map, std::size_t col, int def);
+void decWidth(std::map<std::size_t, int>& map, std::size_t col, int def);
 
 #endif /* GETANDSET_H */

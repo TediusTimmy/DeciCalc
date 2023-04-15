@@ -32,8 +32,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef LIBRARYLOADER_H
 #define LIBRARYLOADER_H
 
-   // You must include the necessary headers before including this one. GetterMap does not name a type.
+namespace Forwards
+ {
+namespace Engine
+ {
+   class CallingContext;
+ }
+ }
+
    // Returns the argument that is at the end of the "-l" chain.
-int LoadLibraries (int argc, char ** argv, Forwards::Engine::CallingContext& context, Forwards::Parser::GetterMap& map);
+int LoadLibraries (int argc, char ** argv, Forwards::Engine::CallingContext& context);
 
 #endif /* LIBRARYLOADER_H */

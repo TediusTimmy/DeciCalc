@@ -30,7 +30,6 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include <fstream>
-#include <iostream> // TODO remove
 
 #include "Forwards/Engine/Cell.h"
 #include "Forwards/Engine/SpreadSheet.h"
@@ -38,17 +37,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Forwards/Parser/Parser.h"
 
-#include "GetAndSet.h"
-
 static void replaceAll(std::string& in, char ch, const std::string& with)
  {
    size_t c;
    c = in.rfind(ch, std::string::npos);
    while (std::string::npos != c)
     {
-      in = in.substr(0U, c) + with + in.substr(c + 1, std::string::npos);
+      in = in.substr(0U, c) + with + in.substr(c + 1U, std::string::npos);
       if (0U != c)
-         c = in.rfind(ch, c - 1);
+         c = in.rfind(ch, c - 1U);
       else
          c = std::string::npos;
     }
@@ -134,7 +131,7 @@ static void replaceAllEntities(std::string& in, const std::string& ent, const st
     {
       in = in.substr(0U, c) + with + in.substr(c + ent.length(), std::string::npos);
       if (0U != c)
-         c = in.rfind(ent, c - 1);
+         c = in.rfind(ent, c - 1U);
       else
          c = std::string::npos;
     }
@@ -149,29 +146,32 @@ static std::string soften(const std::string& in)
    return result;
  }
 
-size_t LoadFile(const std::string& fileName, Forwards::Engine::SpreadSheet* sheet)
+void LoadFile(const std::string& fileName, Forwards::Engine::SpreadSheet* sheet)
  {
    std::ifstream file (fileName.c_str(), std::ios::in);
    if (!file.good())
     {
-      initCellAt(sheet, 0U, 0U);
-      Forwards::Engine::Cell* cell = getCellAt(sheet, 0U, 0U);
+      sheet->initCellAt(0U, 0U);
+      Forwards::Engine::Cell* cell = sheet->getCellAt(0U, 0U);
       cell->type = Forwards::Engine::LABEL;
       cell->currentInput = "Failed to open file " + fileName;
-      return 1U;
+      return;
     }
 
-   size_t maxCol = 0U;
    std::string curCol;
    
    std::getline(file, curCol);
+   if ((0U != curCol.size()) && ('\r' == curCol[curCol.size() - 1]))
+    {
+      curCol = curCol.substr(0U, curCol.size() - 1U);
+    }
    if ("<html><head><style>td { border: 1px solid black; }</style></head><body><table>" != curCol) // I WILL REGRET THIS!
     {
-      initCellAt(sheet, 0U, 0U);
-      Forwards::Engine::Cell* cell = getCellAt(sheet, 0U, 0U);
+      sheet->initCellAt(0U, 0U);
+      Forwards::Engine::Cell* cell = sheet->getCellAt(0U, 0U);
       cell->type = Forwards::Engine::LABEL;
       cell->currentInput = "Failed to open file " + fileName;
-      return 1U;
+      return;
     }
 
    curCol = "";
@@ -204,22 +204,22 @@ size_t LoadFile(const std::string& fileName, Forwards::Engine::SpreadSheet* shee
                 {
                   if ('=' == content[0])
                    {
-                     initCellAt(sheet, col, row);
-                     Forwards::Engine::Cell* cell = getCellAt(sheet, col, row);
+                     sheet->initCellAt(col, row);
+                     Forwards::Engine::Cell* cell = sheet->getCellAt(col, row);
                      cell->type = Forwards::Engine::VALUE;
                      cell->currentInput = content.substr(1U, std::string::npos);
                    }
                   else if ('<' == content[0])
                    {
-                     initCellAt(sheet, col, row);
-                     Forwards::Engine::Cell* cell = getCellAt(sheet, col, row);
+                     sheet->initCellAt(col, row);
+                     Forwards::Engine::Cell* cell = sheet->getCellAt(col, row);
                      cell->type = Forwards::Engine::LABEL;
                      cell->currentInput = content.substr(1U, std::string::npos);
                    }
                   else
                    {
-                     initCellAt(sheet, col, row);
-                     Forwards::Engine::Cell* cell = getCellAt(sheet, col, row);
+                     sheet->initCellAt(col, row);
+                     Forwards::Engine::Cell* cell = sheet->getCellAt(col, row);
                      cell->type = Forwards::Engine::LABEL;
                      cell->currentInput = content;
                    }
@@ -236,11 +236,8 @@ size_t LoadFile(const std::string& fileName, Forwards::Engine::SpreadSheet* shee
           }
        }
 
-      if (row > maxCol) maxCol = row;
       ++col;
       curCol = "";
       std::getline(file, curCol);
     }
-
-   return maxCol;
  }

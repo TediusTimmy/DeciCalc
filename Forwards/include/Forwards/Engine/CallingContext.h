@@ -44,6 +44,7 @@ namespace Engine
 
    class Cell;
    class SpreadSheet;
+   typedef std::map<std::string, std::shared_ptr<Backwards::Engine::Getter> > GetterMap;
 
    class CellFrame
     {
@@ -63,6 +64,7 @@ namespace Engine
       bool inUserInput;
       size_t generation;
       SpreadSheet* theSheet;
+      GetterMap* map;
 
       CellFrame* topCell();
       void pushCell(CellFrame* cell);

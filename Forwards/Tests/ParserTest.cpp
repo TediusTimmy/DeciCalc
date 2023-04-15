@@ -63,7 +63,7 @@ TEST(ParserTests, testICanParseParse)
    context.debugger = nullptr;
    context.globalScope = &global;
 
-   Forwards::Parser::GetterMap map;
+   Forwards::Engine::GetterMap map;
 
    std::shared_ptr<Forwards::Engine::Expression> parse = Forwards::Parser::Parser::ParseFullExpression(lexer, map, logger, 1U, 1U);
 
@@ -91,7 +91,7 @@ TEST(ParserTests, testSomeMoreParse)
    context.debugger = nullptr;
    context.globalScope = &global;
 
-   Forwards::Parser::GetterMap map;
+   Forwards::Engine::GetterMap map;
 
    std::shared_ptr<Forwards::Engine::Expression> parse = Forwards::Parser::Parser::ParseFullExpression(lexer, map, logger, 1U, 1U);
 
@@ -119,7 +119,7 @@ TEST(ParserTests, testSomeReferences)
    context.debugger = nullptr;
    context.globalScope = &global;
 
-   Forwards::Parser::GetterMap map;
+   Forwards::Engine::GetterMap map;
 
    std::shared_ptr<Forwards::Engine::Expression> parse = Forwards::Parser::Parser::ParseFullExpression(lexer, map, logger, 1U, 1U);
 
@@ -148,7 +148,7 @@ TEST(ParserTests, testSomeMoreReferences)
    context.debugger = nullptr;
    context.globalScope = &global;
 
-   Forwards::Parser::GetterMap map;
+   Forwards::Engine::GetterMap map;
 
    std::shared_ptr<Forwards::Engine::Expression> parse = Forwards::Parser::Parser::ParseFullExpression(lexer, map, logger, 1U, 1U);
 
@@ -177,7 +177,7 @@ TEST(ParserTests, testSomeFailure)
    context.debugger = nullptr;
    context.globalScope = &global;
 
-   Forwards::Parser::GetterMap map;
+   Forwards::Engine::GetterMap map;
 
    std::shared_ptr<Forwards::Engine::Expression> parse = Forwards::Parser::Parser::ParseFullExpression(lexer, map, logger, 1U, 1U);
 
@@ -201,7 +201,7 @@ TEST(ParserTests, testRange)
    context.debugger = nullptr;
    context.globalScope = &global;
 
-   Forwards::Parser::GetterMap map;
+   Forwards::Engine::GetterMap map;
 
    std::shared_ptr<Forwards::Engine::Expression> parse = Forwards::Parser::Parser::ParseFullExpression(lexer, map, logger, 1U, 1U);
 
@@ -230,7 +230,7 @@ TEST(ParserTests, testCompares)
    context.debugger = nullptr;
    context.globalScope = &global;
 
-   Forwards::Parser::GetterMap map;
+   Forwards::Engine::GetterMap map;
 
    std::shared_ptr<Forwards::Engine::Expression> parse = Forwards::Parser::Parser::ParseFullExpression(lexer, map, logger, 1U, 1U);
 
@@ -262,7 +262,7 @@ TEST(ParserTests, testCat)
    context.debugger = nullptr;
    context.globalScope = &global;
 
-   Forwards::Parser::GetterMap map;
+   Forwards::Engine::GetterMap map;
 
    std::shared_ptr<Forwards::Engine::Expression> parse = Forwards::Parser::Parser::ParseFullExpression(lexer, map, logger, 1U, 1U);
 
@@ -290,7 +290,7 @@ TEST(ParserTests, testSomeMoreFailure)
    context.debugger = nullptr;
    context.globalScope = &global;
 
-   Forwards::Parser::GetterMap map;
+   Forwards::Engine::GetterMap map;
 
    std::shared_ptr<Forwards::Engine::Expression> parse = Forwards::Parser::Parser::ParseFullExpression(lexer, map, logger, 1U, 1U);
 
@@ -314,7 +314,7 @@ TEST(ParserTests, testSomeFunctions)
    context.debugger = nullptr;
    context.globalScope = &global;
 
-   Forwards::Parser::GetterMap map;
+   Forwards::Engine::GetterMap map;
    map.insert(std::make_pair("FUN", std::shared_ptr<Backwards::Engine::Getter>()));
 
    std::shared_ptr<Forwards::Engine::Expression> parse = Forwards::Parser::Parser::ParseFullExpression(lexer, map, logger, 1U, 1U);
@@ -343,7 +343,7 @@ TEST(ParserTests, testSomeFunctions2)
    context.debugger = nullptr;
    context.globalScope = &global;
 
-   Forwards::Parser::GetterMap map;
+   Forwards::Engine::GetterMap map;
    map.insert(std::make_pair("FUN", std::shared_ptr<Backwards::Engine::Getter>()));
 
    std::shared_ptr<Forwards::Engine::Expression> parse = Forwards::Parser::Parser::ParseFullExpression(lexer, map, logger, 1U, 1U);
@@ -372,7 +372,7 @@ TEST(ParserTests, testSomeFunctionsBad)
    context.debugger = nullptr;
    context.globalScope = &global;
 
-   Forwards::Parser::GetterMap map;
+   Forwards::Engine::GetterMap map;
    map.insert(std::make_pair("FUN", std::shared_ptr<Backwards::Engine::Getter>()));
 
    std::shared_ptr<Forwards::Engine::Expression> parse = Forwards::Parser::Parser::ParseFullExpression(lexer, map, logger, 1U, 1U);

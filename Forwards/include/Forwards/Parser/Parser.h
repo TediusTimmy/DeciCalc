@@ -54,28 +54,27 @@ namespace Forwards
 namespace Engine
  {
    class Expression;
+   typedef std::map<std::string, std::shared_ptr<Backwards::Engine::Getter> > GetterMap;
  }
 
 namespace Parser
  {
 
-   typedef std::map<std::string, std::shared_ptr<Backwards::Engine::Getter> > GetterMap;
-
    class Parser /* Syntax Analyzer */ /* Analyser for the Bri'ish */ final
     {
    public:
 
-      static std::shared_ptr<Engine::Expression> ParseFullExpression (Input::Lexer& src, GetterMap&, Backwards::Engine::Logger&, size_t, size_t);
+      static std::shared_ptr<Engine::Expression> ParseFullExpression (Input::Lexer& src, Engine::GetterMap&, Backwards::Engine::Logger&, size_t, size_t);
 
    private:
 
       static void expect (Input::Lexer& src, Input::Lexeme expected, const std::string& name);
 
-      static std::shared_ptr<Engine::Expression> expression (Input::Lexer& src, GetterMap&, Backwards::Engine::Logger&, size_t, size_t);
-      static std::shared_ptr<Engine::Expression> simple (Input::Lexer& src, GetterMap&, Backwards::Engine::Logger&, size_t, size_t);
-      static std::shared_ptr<Engine::Expression> term (Input::Lexer& src, GetterMap&, Backwards::Engine::Logger&, size_t, size_t);
-      static std::shared_ptr<Engine::Expression> unary (Input::Lexer& src, GetterMap&, Backwards::Engine::Logger&, size_t, size_t);
-      static std::shared_ptr<Engine::Expression> primary (Input::Lexer& src, GetterMap&, Backwards::Engine::Logger&, size_t, size_t);
+      static std::shared_ptr<Engine::Expression> expression (Input::Lexer& src, Engine::GetterMap&, Backwards::Engine::Logger&, size_t, size_t);
+      static std::shared_ptr<Engine::Expression> simple (Input::Lexer& src, Engine::GetterMap&, Backwards::Engine::Logger&, size_t, size_t);
+      static std::shared_ptr<Engine::Expression> term (Input::Lexer& src, Engine::GetterMap&, Backwards::Engine::Logger&, size_t, size_t);
+      static std::shared_ptr<Engine::Expression> unary (Input::Lexer& src, Engine::GetterMap&, Backwards::Engine::Logger&, size_t, size_t);
+      static std::shared_ptr<Engine::Expression> primary (Input::Lexer& src, Engine::GetterMap&, Backwards::Engine::Logger&, size_t, size_t);
 
       static std::shared_ptr<Engine::Expression> cellref (const Input::Token&, size_t, size_t);
     };

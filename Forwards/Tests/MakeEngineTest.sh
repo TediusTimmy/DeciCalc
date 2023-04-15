@@ -10,6 +10,18 @@ cd ../Engine
 ../../MakeTest.sh
 mv ./*.o ../../obj
 
+###### CRAP. Circular dependency. This is going to hurt eventually.
+
+cd ../Input
+../../MakeTest.sh
+mv ./*.o ../../obj
+
+cd ../Parser
+../../MakeTest.sh
+mv ./*.o ../../obj
+
+######
+
 cd ../../bin
 g++ -o EngineTest -Wall -Wextra -Wpedantic --coverage -O0 -I../../../External/googletest/include -I../include -I../../../libdecmath -I../../Backwards/include ../Tests/ExpressionTest.cpp ../obj/*.o ../../../External/googletest/lib/libgtest.a ../../../External/googletest/lib/libgtest_main.a ../obj/*.a
 ../../../External/lcov/bin/lcov --rc lcov_branch_coverage=1 --no-external --capture --initial --directory ../src/Engine --directory ../include/Forwards/Engine --output-file Engine_Base.info
