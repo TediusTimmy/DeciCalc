@@ -125,6 +125,7 @@ int LoadLibraries (int argc, char ** argv, Forwards::Engine::CallingContext& con
                    }
                 }
              }
+            ++i;
           }
          else
           {

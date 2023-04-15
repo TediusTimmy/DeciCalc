@@ -176,6 +176,10 @@ void LoadFile(const std::string& fileName, Forwards::Engine::SpreadSheet* sheet)
 
    curCol = "";
    std::getline(file, curCol);
+   if ((0U != curCol.size()) && ('\r' == curCol[curCol.size() - 1]))
+    {
+      curCol = curCol.substr(0U, curCol.size() - 1U);
+    }
    size_t col = 0U;
    while (("</table></body></html>" != curCol) && (true == file.good()))
     {
@@ -239,5 +243,9 @@ void LoadFile(const std::string& fileName, Forwards::Engine::SpreadSheet* sheet)
       ++col;
       curCol = "";
       std::getline(file, curCol);
+      if ((0U != curCol.size()) && ('\r' == curCol[curCol.size() - 1]))
+       {
+         curCol = curCol.substr(0U, curCol.size() - 1U);
+       }
     }
  }
