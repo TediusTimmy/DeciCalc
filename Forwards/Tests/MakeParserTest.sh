@@ -19,7 +19,7 @@ cd ../Parser
 mv ./*.o ../../obj
 
 cd ../../bin
-g++ -o ParserTest -Wall -Wextra -Wpedantic -g --coverage -O0 -I../../../External/googletest/include -I../include -I../../../libdecmath -I../../Backwards/include ../Tests/ParserTest.cpp ../obj/*.o ../../../External/googletest/lib/libgtest.a ../../../External/googletest/lib/libgtest_main.a ../obj/*.a
+g++ -o ParserTest -Wall -Wextra -Wpedantic -g --coverage -O0 -I../../../External/googletest/include -I../include -I../../../libdecmath -I../../Backwards/include ../Tests/ParserTest.cpp ../Tests/SpreadSheetTest.cpp ../obj/*.o ../../../External/googletest/lib/libgtest.a ../../../External/googletest/lib/libgtest_main.a ../obj/*.a
 ../../../External/lcov/bin/lcov --rc lcov_branch_coverage=1 --no-external --capture --initial --directory ../src/Parser --directory ../include/Forwards/Parser --output-file Parser_Base.info
 ./ParserTest.exe
 ../../../External/lcov/bin/lcov --rc lcov_branch_coverage=1 --no-external --capture --directory ../src/Parser --directory ../include/Forwards/Parser --directory . --output-file Parser_Run.info

@@ -158,7 +158,7 @@ namespace Engine
        }
 
       Cell* cell = context.theSheet->getCellAt(col, row);
-         // If positive overflow or no data, Nil.
+         // If no cell, Nil.
       if (nullptr == cell)
        {
          return std::make_shared<Types::NilValue>();
@@ -173,12 +173,6 @@ namespace Engine
             result = std::make_shared<Types::NilValue>();
           }
          return result;
-       }
-
-         // If we have already evaluated this cell this generation, stop.
-      if (context.generation == cell->previousGeneration)
-       {
-         return cell->previousValue;
        }
 
          // Guess we need to do work.

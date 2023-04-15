@@ -19,5 +19,5 @@ g++ -I../../include -I../../../../libdecmath -I../../../Backwards/include -s -O3
 mv ./*.o ../../obj
 
 cd ../../bin
-g++ -o AllTest -s -Wall -Wextra -Wpedantic -O3 -I../../../External/googletest/include -I../include -I../../../libdecmath -I../../Backwards/include ../Tests/ExpressionTest.cpp ../Tests/LexerTest.cpp ../Tests/ParserTest.cpp ../Tests/TypesTest.cpp ../obj/*.o ../../../External/googletest/lib/libgtest.a ../../../External/googletest/lib/libgtest_main.a ../obj/*.a
+g++ -o AllTest -s -Wall -Wextra -Wpedantic -O3 -I../../../External/googletest/include -I../include -I../../../libdecmath -I../../Backwards/include ../Tests/ExpressionTest.cpp ../Tests/LexerTest.cpp ../Tests/ParserTest.cpp ../Tests/SpreadSheetTest.cpp ../Tests/TypesTest.cpp ../obj/*.o ../../../External/googletest/lib/libgtest.a ../../../External/googletest/lib/libgtest_main.a ../obj/*.a
 ./AllTest.exe

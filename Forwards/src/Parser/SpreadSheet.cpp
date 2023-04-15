@@ -111,11 +111,20 @@ namespace Engine
        }
       CellFrame newFrame (cell, col, row);
 
+         // If we have already evaluated this cell this generation, stop.
+      if ((context.generation == cell->previousGeneration) && (context.inUserInput == rethrow))
+       {
+         OUT = cell->previousValue;
+         return result;
+       }
+
+         // If this is a LABEL, then set the value.
       std::shared_ptr<Expression> value = cell->value;
       if ((LABEL == cell->type) && (nullptr == cell->value.get()))
        {
          value = std::make_shared<Constant>(Input::Token(), std::make_shared<Types::StringValue>(cell->currentInput));
        }
+         // Else, this is a VALUE, and we need to parse it.
       if (nullptr == value.get())
        {
          Backwards::Input::StringInput interlinked (cell->currentInput);
@@ -131,11 +140,13 @@ namespace Engine
           }
        }
 
+         // If the parse failed, leave. Result will have the first parser message.
       if (nullptr == value.get())
        {
          return result;
        }
 
+         // If this is a regular update, update the cell. Eww....
       if (false == context.inUserInput)
        {
          cell->currentInput = "";
@@ -295,6 +306,7 @@ namespace Engine
              }
           }
        }
+      ++context.generation;
     }
 
  } // namespace Engine
