@@ -208,7 +208,7 @@ namespace Engine
              {
                for (size_t col = 0U; col < sheet.size(); ++col)
                 {
-                  for (size_t row = sheet[col].size() - 1U; row != ~0U; --row)
+                  for (size_t row = sheet[col].size() - 1U; row != (static_cast<size_t>(0U) - 1U); --row)
                    {
                      std::shared_ptr<Types::ValueType> trash;
                      (void) computeCell(context, trash, col, row, false);
@@ -220,7 +220,7 @@ namespace Engine
           {
             if (top_down) // Going from top-to-bottom
              {
-               for (size_t col = sheet.size() - 1U; col != ~0U; --col)
+               for (size_t col = sheet.size() - 1U; col != (static_cast<size_t>(0U) - 1U); --col)
                 {
                   for (size_t row = 0U; row < sheet[col].size(); ++row)
                    {
@@ -231,9 +231,9 @@ namespace Engine
              }
             else // Going from bottom-to-top
              {
-               for (size_t col = sheet.size() - 1U; col != ~0U; --col)
+               for (size_t col = sheet.size() - 1U; col != (static_cast<size_t>(0U) - 1U); --col)
                 {
-                  for (size_t row = sheet[col].size() - 1U; row != ~0U; --row)
+                  for (size_t row = sheet[col].size() - 1U; row != (static_cast<size_t>(0U) - 1U); --row)
                    {
                      std::shared_ptr<Types::ValueType> trash;
                      (void) computeCell(context, trash, col, row, false);
@@ -259,7 +259,7 @@ namespace Engine
              }
             else // Going from right-to-left
              {
-               for (size_t row = max_row - 1U; row != ~0U; --row)
+               for (size_t row = max_row - 1U; row != (static_cast<size_t>(0U) - 1U); --row)
                 {
                   for (size_t col = 0U; col < sheet.size(); ++col)
                    {
@@ -275,7 +275,7 @@ namespace Engine
              {
                for (size_t row = 0U; row < max_row; ++row)
                 {
-                  for (size_t col = sheet.size() - 1U; col != ~0U; --col)
+                  for (size_t col = sheet.size() - 1U; col != (static_cast<size_t>(0U) - 1U); --col)
                    {
                      std::shared_ptr<Types::ValueType> trash;
                      (void) computeCell(context, trash, col, row, false);
@@ -284,9 +284,9 @@ namespace Engine
              }
             else // Going from right-to-left
              {
-               for (size_t row = max_row - 1U; row != ~0U; --row)
+               for (size_t row = max_row - 1U; row != (static_cast<size_t>(0U) - 1U); --row)
                 {
-                  for (size_t col = sheet.size() - 1U; col != ~0U; --col)
+                  for (size_t col = sheet.size() - 1U; col != (static_cast<size_t>(0U) - 1U); --col)
                    {
                      std::shared_ptr<Types::ValueType> trash;
                      (void) computeCell(context, trash, col, row, false);

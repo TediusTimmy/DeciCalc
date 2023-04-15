@@ -10,6 +10,7 @@ F_INCLUDE := $(B_INCLUDE) -IForwards/include
 
 ifeq "$(MAKECMDGOALS)" "release"
    CFLAGS += -O2
+   BFLAGS += -s
 endif
 
 ifeq "$(MAKECMDGOALS)" "debug"
@@ -32,7 +33,7 @@ debug: all
 
 
 bin/DeciCalc.exe: lib/libdecmath.a lib/Backwards.a lib/Forwards.a obj/main.o obj/Screen.o obj/GetAndSet.o obj/LibraryLoader.o obj/SaveFile.o obj/StdLib.o | bin
-	$(CCP) $(CFLAGS) -s -o bin/DeciCalc.exe obj/*.o lib/*.a -lncurses
+	$(CCP) $(CFLAGS) $(BFLAGS) -o bin/DeciCalc.exe obj/*.o lib/*.a -lncurses
 
 obj/main.o: Curses/main.cpp
 	$(CCP) $(CFLAGS) $(F_INCLUDE) -IOddsAndEnds -c -o obj/main.o Curses/main.cpp
