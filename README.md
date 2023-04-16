@@ -53,7 +53,7 @@ Commands
 * p : paste the current cell
 * e : edit the current cell's contents
 * Shift left/right (also F9/F12 because ... Windows) : widen or narrow the current column. Columns can be between 1 and 40 cells wide. This is not a saved setting.
-* # : Switch between column-major and row-major recalculation.
+* `#` : Switch between column-major and row-major recalculation.
 * $ : Switch between top-to-bottom and bottom-to-top recalculation.
 * % : Switch between left-to-right and right-to-left recalculation.
 * , : Toggle between using ',' and '.' as the decimal separator. This is not a saved setting.
