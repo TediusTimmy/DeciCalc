@@ -42,21 +42,21 @@ Commands
 * Arrow keys : navigate.
 * Page Up / Page Down : move to the next screen of rows.
 * Home : goto cell A1
-* g : type in a cell name, then enter, and the current cell cursor will be moved to that cell. Note that you cannot see the cell name that you are typing.
-* < : start entering a label in this cell. Finish by pressing enter.
-* = : start entering a formula in this cell. Finish by pressing enter.
-* q or F7 : exit. You must next press either 'y' to save and exit, or 'n' to not save and exit to actually exit.
-* ! : recalculate the sheet
-* W : save the sheet
-* d : delete the current cell
-* y : copy the current cell
-* p : paste the current cell
-* e : edit the current cell's contents
+* `g` : type in a cell name, then enter, and the current cell cursor will be moved to that cell. Note that you cannot see the cell name that you are typing.
+* `<` : start entering a label in this cell. Finish by pressing enter.
+* `=` : start entering a formula in this cell. Finish by pressing enter.
+* `q` or F7 : exit. You must next press either 'y' to save and exit, or 'n' to not save and exit to actually exit.
+* `!` : recalculate the sheet
+* `W` : save the sheet
+* `dd` : delete the current cell
+* `yy` : copy the current cell
+* `pp` : paste the current cell
+* `e` : edit the current cell's contents
 * Shift left/right (also F9/F12 because ... Windows) : widen or narrow the current column. Columns can be between 1 and 40 cells wide. This is not a saved setting.
 * `#` : Switch between column-major and row-major recalculation.
-* $ : Switch between top-to-bottom and bottom-to-top recalculation.
-* % : Switch between left-to-right and right-to-left recalculation.
-* , : Toggle between using ',' and '.' as the decimal separator. This is not a saved setting.
+* `$` : Switch between top-to-bottom and bottom-to-top recalculation.
+* `%` : Switch between left-to-right and right-to-left recalculation.
+* `,` : Toggle between using ',' and '.' as the decimal separator. This is not a saved setting.
 
 The sheet automatically recalculates after you finish entering a label or formula, and when you paste a cell. If a cell references a cell that hasn't been computed yet, then that cell will be computed, unless we are already in the process of computing that cell (circular reference). This ought to remove most of the reasons for wanting to change the order of sheet computation (but, if you feel the need, it is very customizable).
 
