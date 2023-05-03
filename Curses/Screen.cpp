@@ -283,7 +283,7 @@ void UpdateScreen(SharedData& data)
       printw("   ");
       int cx = 3;
       size_t cc = 0U + data.tr_col;
-      for (;;)
+      for (; cc <= MAX_COL;)
        {
          int nextWidth = getWidth(data.col_widths, cc, data.def_col_width);
          if (cx + nextWidth <= x)
@@ -300,12 +300,12 @@ void UpdateScreen(SharedData& data)
           }
          else
           {
-            attron(COLOR_PAIR(3));
-            for (; cx < x; ++cx) addch(' ');
             break;
           }
          ++cc;
        }
+      attron(COLOR_PAIR(3));
+      for (; cx < x; ++cx) addch(' ');
     }
 
       // All other lines.
@@ -326,7 +326,7 @@ void UpdateScreen(SharedData& data)
       printw("%s", rowName.c_str());
       int cx = 3;
       size_t cc = data.tr_col;
-      for (;;)
+      for (; cc <= MAX_COL;)
        {
          int nextWidth = getWidth(data.col_widths, cc, data.def_col_width);
          if (cx + nextWidth <= x)
@@ -397,12 +397,12 @@ void UpdateScreen(SharedData& data)
           }
          else
           {
-            attron(COLOR_PAIR(3));
-            for (; cx < x; ++cx) addch(' ');
             break;
           }
          ++cc;
        }
+      attron(COLOR_PAIR(3));
+      for (; cx < x; ++cx) addch(' ');
     }
 
    move(my, mx);
@@ -414,10 +414,32 @@ size_t CountColumns(SharedData& data, size_t fromHere, int x)
    size_t tc = 0U;
    size_t cc = fromHere;
    int cx = 3;
-   for (;;)
+   for (; cc <= MAX_COL;)
     {
       int nextWidth = getWidth(data.col_widths, cc, data.def_col_width);
       ++cc;
+      if (cx + nextWidth <= x)
+       {
+         ++tc;
+         cx += nextWidth;
+       }
+      else
+       {
+         break;
+       }
+    }
+   return tc;
+ }
+
+size_t CountColumnsLeft(SharedData& data, int x)
+ {
+   size_t tc = 0U;
+   size_t cc = MAX_COL;
+   int cx = 3;
+   for (;;)
+    {
+      int nextWidth = getWidth(data.col_widths, cc, data.def_col_width);
+      --cc;
       if (cx + nextWidth <= x)
        {
          ++tc;
@@ -490,12 +512,12 @@ int ProcessInput(SharedData& data)
       GetRC(temp, col, row);
       if ((-1 == col) || (-1 == row))
          break;
-      size_t cc = CountColumns(data, col, x);
+      size_t cl = CountColumnsLeft(data, x);
       data.c_col = col;
       data.tr_col = col;
       data.c_row = row;
       data.tr_row = row;
-      if ((data.tr_col + cc) > MAX_COL) data.tr_col = MAX_COL - cc + 1;
+      if (((MAX_COL - cl) < static_cast<size_t>(col)) && (static_cast<size_t>(col) <= MAX_COL)) data.tr_col = MAX_COL - cl + 1;
       if ((data.tr_row + y - 4) > MAX_ROW) data.tr_row = MAX_ROW - y + 5;
     }
       break;
@@ -652,6 +674,10 @@ int ProcessInput(SharedData& data)
    case KEY_F(12):
    case KEY_SRIGHT:
       incWidth(data.col_widths, data.c_col, data.def_col_width);
+      if ((CountColumns(data, data.tr_col, x) != tc) && (data.c_col == (data.tr_col +  tc - 1)))
+       {
+         data.tr_col++;
+       }
       break;
    case '#':
       data.context->theSheet->c_major = !data.context->theSheet->c_major;
