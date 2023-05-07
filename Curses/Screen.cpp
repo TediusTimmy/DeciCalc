@@ -237,12 +237,12 @@ void UpdateScreen(SharedData& data)
        {
          if (true == data.inputMode)
           {
-            std::string content = curCell->currentInput;
-            if (content.size() > static_cast<size_t>(x - 5))
+            std::string content = curCell->currentInput.substr(data.baseChar, std::string::npos);
+            if (content.size() > static_cast<size_t>(x))
              {
-               content = content.substr(content.size() - x + 5, std::string::npos);
+               content = content.substr(0U, x);
              }
-            mx = content.size();
+            mx = data.editChar - data.baseChar;
             printw("%s", content.c_str());
             for (int i = (x - content.size()); i > 0; --i) addch(' ');
           }
@@ -467,7 +467,28 @@ int ProcessInput(SharedData& data)
     {
       if ((c >= ' ') && (c <= '~'))
        {
-         curCell->currentInput += c;
+         if (data.editChar == curCell->currentInput.size())
+          {
+            curCell->currentInput += c;
+          }
+         else
+          {
+            if (true == data.insertMode)
+             {
+               curCell->currentInput = curCell->currentInput.substr(0U, data.editChar) + static_cast<char>(c) + curCell->currentInput.substr(data.editChar, std::string::npos);
+             }
+            else
+             {
+               curCell->currentInput[data.editChar] = c;
+             }
+          }
+         ++data.editChar;
+
+         if (data.editChar > (x - 5U + data.baseChar))
+          {
+            ++data.baseChar;
+          }
+
          if (Forwards::Engine::VALUE == curCell->type)
           {
             if ('.' == c) data.useComma = false;
@@ -478,14 +499,102 @@ int ProcessInput(SharedData& data)
        {
          if ("" != curCell->currentInput)
           {
-            if (curCell->currentInput.size() > 1U)
+            if (data.editChar == curCell->currentInput.size())
              {
-               curCell->currentInput = curCell->currentInput.substr(0U, curCell->currentInput.size() - 1U);
+               if (curCell->currentInput.size() > 1U)
+                {
+                  curCell->currentInput = curCell->currentInput.substr(0U, curCell->currentInput.size() - 1U);
+                }
+               else
+                {
+                  curCell->currentInput = "";
+                }
              }
             else
              {
-               curCell->currentInput = "";
+               curCell->currentInput = curCell->currentInput.substr(0U, data.editChar - 1U) + curCell->currentInput.substr(data.editChar, std::string::npos);
              }
+            --data.editChar;
+
+            if ((data.editChar + data.baseChar) > curCell->currentInput.size())
+             {
+               --data.baseChar;
+             }
+          }
+       }
+      else if (c == KEY_DC)
+       {
+         if ("" != curCell->currentInput)
+          {
+            if (data.editChar != curCell->currentInput.size())
+             {
+               if (curCell->currentInput.size() > 1U)
+                {
+                  curCell->currentInput = curCell->currentInput.substr(0U, data.editChar) + curCell->currentInput.substr(data.editChar + 1U, std::string::npos);
+                }
+               else
+                {
+                  curCell->currentInput = "";
+                }
+
+               if ((data.editChar + data.baseChar) > curCell->currentInput.size())
+                {
+                  --data.baseChar;
+                }
+             }
+          }
+       }
+      else if (c == KEY_LEFT)
+       {
+         if (0U != data.editChar)
+          {
+            --data.editChar;
+
+            if ((data.editChar == (data.baseChar + 5U)) && (0U != data.baseChar))
+             {
+               --data.baseChar;
+             }
+          }
+       }
+      else if (c == KEY_RIGHT)
+       {
+         if (data.editChar != curCell->currentInput.size())
+          {
+            ++data.editChar;
+
+            if (data.editChar > (x - 5U + data.baseChar))
+             {
+               ++data.baseChar;
+             }
+          }
+       }
+      else if (c == KEY_IC)
+       {
+         data.insertMode = !data.insertMode;
+         if (true == data.insertMode) // This doesn't work in Cygwin.
+          {
+            curs_set(1);
+          }
+         else
+          {
+            curs_set(2);
+          }
+       }
+      else if (c == KEY_HOME)
+       {
+         data.baseChar = 0U;
+         data.editChar = 0U;
+       }
+      else if (c == KEY_END)
+       {
+         data.editChar = curCell->currentInput.size();
+         if (data.editChar > (x - 5U))
+          {
+            data.baseChar = data.editChar - x + 5U;
+          }
+         else
+          {
+            data.baseChar = 0U;
           }
        }
       else if ((c == '\n') || (c == '\r') || (c == KEY_ENTER))
@@ -590,6 +699,8 @@ int ProcessInput(SharedData& data)
       curCell->currentInput = "";
       curCell->value.reset();
       data.inputMode = true;
+      data.baseChar = 0U;
+      data.editChar = 0U;
     }
       break;
    case '=':
@@ -603,6 +714,8 @@ int ProcessInput(SharedData& data)
       curCell->currentInput = "";
       curCell->value.reset();
       data.inputMode = true;
+      data.baseChar = 0U;
+      data.editChar = 0U;
     }
       break;
    case 'q':
@@ -659,6 +772,16 @@ int ProcessInput(SharedData& data)
           {
             curCell->currentInput = curCell->value->toString(data.c_col, data.c_row);
             curCell->value.reset();
+
+            data.editChar = curCell->currentInput.size();
+            if (data.editChar > (x - 5U))
+             {
+               data.baseChar = data.editChar - x + 5U;
+             }
+            else
+             {
+               data.baseChar = 0U;
+             }
           }
          data.inputMode = true;
        }

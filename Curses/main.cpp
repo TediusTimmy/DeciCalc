@@ -87,6 +87,7 @@ int main (int argc, char ** argv)
    state.tr_col = 0U;
 
    state.inputMode = false;
+   state.insertMode = true;
    state.useComma = false;
 
    state.def_col_width = 9;

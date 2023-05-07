@@ -41,6 +41,9 @@ public:
    size_t tr_row;
 
    bool inputMode;
+   bool insertMode;
+   size_t baseChar;
+   size_t editChar;
    bool useComma;
 
    size_t def_col_width;
