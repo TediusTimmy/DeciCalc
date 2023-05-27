@@ -57,8 +57,21 @@ Commands
 * `$` : Switch between top-to-bottom and bottom-to-top recalculation.
 * `%` : Switch between left-to-right and right-to-left recalculation.
 * `,` : Toggle between using ',' and '.' as the decimal separator. This is not a saved setting.
+* `+` : If the current cell is empty, start entering a formula in this cell, else enter edit mode and append to this cell. If the current cell is a formula, append a '+' to the formula.
 
 The sheet automatically recalculates after you finish entering a label or formula, and when you paste a cell. If a cell references a cell that hasn't been computed yet, then that cell will be computed, unless we are already in the process of computing that cell (circular reference). This ought to remove most of the reasons for wanting to change the order of sheet computation (but, if you feel the need, it is very customizable).
+
+
+Edit Mode
+---------
+* Left / Right : change cursor location
+* Up / Down : End edit mode and navigate the pressed direction
+* Page Up / Page Down : End edit mode and navigate Left / Right, respectively
+* Insert : Toggle between insert / overwrite mode
+* Delete : Delete character at cursor
+* BackSpace : Delete character before cursor
+* Home : Move cursor to beginning of input
+* End : Move cursor to end of input
 
 
 Formula Language

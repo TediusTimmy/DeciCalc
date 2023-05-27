@@ -465,6 +465,7 @@ int ProcessInput(SharedData& data)
 
    if (true == data.inputMode)
     {
+      bool done = true;
       if ((c >= ' ') && (c <= '~'))
        {
          if (data.editChar == curCell->currentInput.size())
@@ -602,7 +603,25 @@ int ProcessInput(SharedData& data)
          data.inputMode = false;
          data.context->theSheet->recalc(*data.context);
        }
-      return returnValue;
+      else if ((KEY_DOWN == c) || (KEY_UP == c) || (KEY_NPAGE == c) || (KEY_PPAGE == c))
+       {
+         data.inputMode = false;
+         data.context->theSheet->recalc(*data.context);
+         done = false;
+         if (KEY_NPAGE == c)
+          {
+            c = KEY_RIGHT;
+          }
+         else if (KEY_PPAGE == c)
+          {
+            c = KEY_LEFT;
+          }
+       }
+
+      if (true == done)
+       {
+         return returnValue;
+       }
     }
 
    switch (c)
@@ -772,17 +791,18 @@ int ProcessInput(SharedData& data)
           {
             curCell->currentInput = curCell->value->toString(data.c_col, data.c_row);
             curCell->value.reset();
-
-            data.editChar = curCell->currentInput.size();
-            if (data.editChar > (x - 5U))
-             {
-               data.baseChar = data.editChar - x + 5U;
-             }
-            else
-             {
-               data.baseChar = 0U;
-             }
           }
+
+         data.editChar = curCell->currentInput.size();
+         if (data.editChar > (x - 5U))
+          {
+            data.baseChar = data.editChar - x + 5U;
+          }
+         else
+          {
+            data.baseChar = 0U;
+          }
+
          data.inputMode = true;
        }
     }
@@ -813,6 +833,43 @@ int ProcessInput(SharedData& data)
       break;
    case ',':
       data.useComma = !data.useComma;
+      break;
+   case '+':
+    {
+      if (nullptr == curCell)
+       {
+         data.context->theSheet->initCellAt(data.c_col, data.c_row);
+         curCell = data.context->theSheet->getCellAt(data.c_col, data.c_row);
+         curCell->type = Forwards::Engine::VALUE;
+
+         data.baseChar = 0U;
+         data.editChar = 0U;
+       }
+      else
+       {
+         if (("" == curCell->currentInput) && (nullptr != curCell->value.get()))
+          {
+            curCell->currentInput = curCell->value->toString(data.c_col, data.c_row);
+            curCell->value.reset();
+          }
+
+         if (Forwards::Engine::VALUE == curCell->type)
+          {
+            curCell->currentInput += "+";
+          }
+
+         data.editChar = curCell->currentInput.size();
+         if (data.editChar > (x - 5U))
+          {
+            data.baseChar = data.editChar - x + 5U;
+          }
+         else
+          {
+            data.baseChar = 0U;
+          }
+       }
+      data.inputMode = true;
+    }
       break;
     }
 
