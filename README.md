@@ -12,6 +12,12 @@ As Sagan said, "If you want to bake an apple pie from scratch, you must first in
 So, I made a spreadsheet program to do simple things with money. Mostly, I want to track my portfolio with it. And, at this time, it is ready for me to begin eating my own dogfood.
 
 
+Nota Bene
+---------
+
+I have more-or-less moved on to the BC-DeciCalc version. I will still fix critical bugs, but I will focus most of my time on the DeciCalc with arbitrary precision fixed-point numbers, because 16 digits is too few (even if arbitrary-precision algorithms are a whole different world than what I am accustomed to).
+
+
 How To Build
 ------------
 
