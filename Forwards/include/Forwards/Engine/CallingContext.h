@@ -44,9 +44,11 @@ namespace Engine
 
    class Cell;
    class SpreadSheet;
+   class Expression;
    typedef std::map<std::string, std::shared_ptr<Backwards::Engine::Getter> > GetterMap;
+   typedef std::map<std::string, std::shared_ptr<Expression> > NameMap;
 
-   class CellFrame
+   class CellFrame final
     {
    public:
       CellFrame(Cell* cell, size_t col, size_t row) : cell(cell), col(col), row(row) { }
@@ -56,7 +58,7 @@ namespace Engine
       size_t row;
     };
 
-   class CallingContext : public Backwards::Engine::CallingContext
+   class CallingContext final : public Backwards::Engine::CallingContext
     {
    public:
       CallingContext();
@@ -65,18 +67,19 @@ namespace Engine
       size_t generation;
       SpreadSheet* theSheet;
       GetterMap* map;
+      NameMap* names;
 
       CellFrame* topCell();
       void pushCell(CellFrame* cell);
       void popCell();
 
-      virtual std::shared_ptr<Backwards::Engine::CallingContext> duplicate(); // This function exists for the debugger.
+      virtual std::shared_ptr<Backwards::Engine::CallingContext> duplicate() override; // This function exists for the debugger.
 
    private:
       std::vector<CellFrame*> cells;
 
    protected:
-      virtual void duplicate(std::shared_ptr<CallingContext>);
+      void duplicate(std::shared_ptr<CallingContext>);
     };
 
  } // namespace Engine

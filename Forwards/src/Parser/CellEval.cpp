@@ -29,7 +29,21 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+#include "Forwards/Engine/StdLib.h"
+#include "Forwards/Engine/CellRefEval.h"
+
+#include "Backwards/Engine/Logger.h"
+#include "Backwards/Input/StringInput.h"
+
+#include "Forwards/Parser/Parser.h"
+#include "Forwards/Parser/StringLogger.h"
+
+#include "Forwards/Engine/Expression.h"
 #include "Forwards/Engine/CallingContext.h"
+
+#include "Backwards/Types/StringValue.h"
+
+#include "Backwards/Engine/ProgrammingException.h"
 
 namespace Forwards
  {
@@ -37,42 +51,42 @@ namespace Forwards
 namespace Engine
  {
 
-   CallingContext::CallingContext() : inUserInput(false), generation(1U), theSheet(nullptr), map(nullptr), names(nullptr)
+   STDLIB_UNARY_DECL_WITH_CONTEXT(CellEval)
     {
-    }
-
-   CellFrame* CallingContext::topCell()
-    {
-      if (false == cells.empty())
+      try
        {
-         return cells.back();
+         CallingContext& text = dynamic_cast<CallingContext&>(context);
+         if (typeid(Backwards::Types::StringValue) == typeid(*arg))
+          {
+            Backwards::Input::StringInput string (static_cast<const Backwards::Types::StringValue&>(*arg).value);
+            Input::Lexer lexer (string);
+
+            Backwards::Engine::Logger* temp = text.logger;
+            Parser::StringLogger newLogger;
+
+            text.logger = &newLogger;
+            std::shared_ptr<Expression> res = Parser::Parser::ParseFullExpression(lexer, *text.map, *text.logger, text.topCell()->col, text.topCell()->row);
+            text.logger = temp;
+
+            if (nullptr != res.get())
+             {
+               CellRefEval value (res);
+               return value.evaluate(text);
+             }
+            else
+             {
+               throw Backwards::Types::TypedOperationException("Error evaluating String.");
+             }
+          }
+         else
+          {
+            throw Backwards::Types::TypedOperationException("Error evaluating non-String.");
+          }
        }
-      return nullptr;
-    }
-
-   void CallingContext::pushCell(CellFrame* cell)
-    {
-      cells.emplace_back(cell);
-    }
-
-   void CallingContext::popCell()
-    {
-      cells.pop_back();
-    }
-
-   std::shared_ptr<Backwards::Engine::CallingContext> CallingContext::duplicate()
-    {
-      std::shared_ptr<CallingContext> result = std::make_shared<CallingContext>();
-      duplicate(result);
-      return result;
-    }
-
-   void CallingContext::duplicate(std::shared_ptr<CallingContext> result)
-    {
-      Backwards::Engine::CallingContext::duplicate(result);
-      result->generation = generation;
-      result->theSheet = theSheet;
-      result->pushCell(topCell());
+      catch (const std::bad_cast&)
+       {
+         throw Backwards::Engine::ProgrammingException("Backwards context wasn't a Forwards context.");
+       }
     }
 
  } // namespace Engine

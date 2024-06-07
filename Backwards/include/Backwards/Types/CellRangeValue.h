@@ -46,6 +46,9 @@ namespace Types
       CellRangeHolder() = default;
       virtual ~CellRangeHolder() = default;
 
+      virtual std::shared_ptr<ValueType> getIndex (size_t index) const = 0;
+      virtual size_t getSize() const = 0;
+
       virtual bool equal (const CellRangeValue& lhs) const = 0;
       virtual bool notEqual (const CellRangeValue& lhs) const = 0;
       virtual bool sort (const CellRangeValue& lhs) const = 0;
@@ -59,15 +62,18 @@ namespace Types
       std::shared_ptr<CellRangeHolder> value;
 
       CellRangeValue();
-      CellRangeValue(const std::shared_ptr<CellRangeHolder>& value);
+      explicit CellRangeValue(const std::shared_ptr<CellRangeHolder>& value);
 
       CellRangeValue(const CellRangeValue&) = delete;
       CellRangeValue& operator=(const CellRangeValue&) = delete;
 
-      const std::string& getTypeName() const;
+      const std::string& getTypeName() const override;
 
-      bool equal (const CellRangeValue& lhs) const;
-      bool notEqual (const CellRangeValue& lhs) const;
+      std::shared_ptr<ValueType> getIndex (size_t index) const;
+      size_t getSize() const;
+
+      bool equal (const CellRangeValue& lhs) const override;
+      bool notEqual (const CellRangeValue& lhs) const override;
 
       DECLAREVISITOR
 

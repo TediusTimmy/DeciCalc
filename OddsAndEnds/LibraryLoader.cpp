@@ -30,28 +30,29 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include <iostream>
+#include <fstream>
 #include <functional>
 #include <algorithm>
+#include <iterator>
 
 #include "Backwards/Input/Lexer.h"
-#include "Backwards/Input/LineBufferedStreamInput.h"
 #include "Backwards/Input/StringInput.h"
 
 #include "Backwards/Parser/SymbolTable.h"
 #include "Backwards/Parser/Parser.h"
-#include "Backwards/Parser/ContextBuilder.h"
 
 #include "Backwards/Engine/FatalException.h"
 #include "Backwards/Engine/Logger.h"
 #include "Backwards/Engine/Statement.h"
 
 #include "Forwards/Engine/CallingContext.h"
+#include "Forwards/Parser/ContextBuilder.h"
 #include "Forwards/Parser/Parser.h"
 #include "Forwards/Parser/StringLogger.h"
 
 #include "StdLib.h"
 
-static void dumpLog(Backwards::Engine::Logger& logger)
+void dumpLog(Backwards::Engine::Logger& logger)
  {
    try
     {
@@ -72,9 +73,42 @@ static void dumpLog(Backwards::Engine::Logger& logger)
     }
  }
 
-int LoadLibraries (int argc, char ** argv, Forwards::Engine::CallingContext& context)
+int PreLoadLibraries (int argc, char ** argv, std::vector<std::pair<std::string, std::string> >& libraries)
  {
-   Backwards::Parser::ContextBuilder::createGlobalScope(*context.globalScope); // Create the global scope before the table.
+
+   int i = 1;
+   while (i < argc)
+    {
+      if (std::string("-l") == argv[i])
+       {
+         ++i;
+         if (i < argc)
+          {
+            std::ifstream file (argv[i], std::ios_base::in);
+            if (file)
+             {
+               std::string lib {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+               libraries.push_back(std::make_pair(argv[i], lib));
+             }
+            else
+             {
+               std::cerr << "Error processing file: " << argv[i] << std::endl;
+             }
+          }
+         ++i;
+       }
+      else
+       {
+         break;
+       }
+    }
+
+   return i;
+ }
+
+void LoadLibraries (const std::vector<std::pair<std::string, std::string> >& allLibs, Forwards::Engine::CallingContext& context)
+ {
+   Forwards::Parser::ContextBuilder::createGlobalScope(*context.globalScope); // Create the global scope before the table.
    Backwards::Parser::GetterSetter gs;
    Backwards::Parser::SymbolTable table (gs, *context.globalScope);
 
@@ -86,50 +120,34 @@ int LoadLibraries (int argc, char ** argv, Forwards::Engine::CallingContext& con
       res->execute(context);
     }
 
-   int i = 1;
-   if (argc > 1)
+   for (const std::pair<std::string, std::string>& lib : allLibs)
     {
-      while (i < argc)
-       {
-         if (std::string("-l") == argv[i])
-          {
-            ++i;
-            if (i < argc)
-             {
-               Backwards::Input::FileInput console (argv[i]);
-               Backwards::Input::Lexer lexer (console, argv[i]);
+      Backwards::Input::StringInput file (lib.second);
+      Backwards::Input::Lexer lexer (file, lib.first);
 
-               std::shared_ptr<Backwards::Engine::Statement> res = Backwards::Parser::Parser::ParseFunctions(lexer, table, *context.logger);
-               if (nullptr == res.get())
-                {
-                  std::cerr << "Error processing file: " << argv[i] << std::endl;
-                  dumpLog(*context.logger);
-                }
-               else
-                {
-                  try
-                   {
-                     res->execute(context);
-                   }
-                  catch (const Backwards::Types::TypedOperationException& e)
-                   {
-                     std::cerr << "Caught runtime exception: " << e.what() << std::endl;
-                     std::cerr << "Error processing file: " << argv[i] << std::endl;
-                     dumpLog(*context.logger);
-                   }
-                  catch (const Backwards::Engine::FatalException& e)
-                   {
-                     std::cerr << "Caught Fatal Error: " << e.what() << std::endl;
-                     std::cerr << "Error processing file: " << argv[i] << std::endl;
-                     dumpLog(*context.logger);
-                   }
-                }
-             }
-            ++i;
-          }
-         else
+      std::shared_ptr<Backwards::Engine::Statement> res = Backwards::Parser::Parser::ParseFunctions(lexer, table, *context.logger);
+      if (nullptr == res.get())
+       {
+         std::cerr << "Error processing file: " << lib.first << std::endl;
+         dumpLog(*context.logger);
+       }
+      else
+       {
+         try
           {
-            break;
+            res->execute(context);
+          }
+         catch (const Backwards::Types::TypedOperationException& e)
+          {
+            std::cerr << "Caught runtime exception: " << e.what() << std::endl;
+            std::cerr << "Error processing file: " << lib.first << std::endl;
+            dumpLog(*context.logger);
+          }
+         catch (const Backwards::Engine::FatalException& e)
+          {
+            std::cerr << "Caught Fatal Error: " << e.what() << std::endl;
+            std::cerr << "Error processing file: " << lib.first << std::endl;
+            dumpLog(*context.logger);
           }
        }
     }
@@ -143,6 +161,4 @@ int LoadLibraries (int argc, char ** argv, Forwards::Engine::CallingContext& con
          context.map->insert(std::make_pair(name, table.getVariableGetter(name)));
        }
     }
-
-   return i;
  }

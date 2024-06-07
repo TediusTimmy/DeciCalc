@@ -29,48 +29,31 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef FORWARDS_INPUT_LEXEMES_H
-#define FORWARDS_INPUT_LEXEMES_H
+#ifndef FORWARDS_PARSER_CONTEXTBUILDER_H
+#define FORWARDS_PARSER_CONTEXTBUILDER_H
+
+namespace Backwards
+ {
+namespace Engine
+ {
+   class Scope;
+ }
+ }
 
 namespace Forwards
  {
 
-namespace Input
+namespace Parser
  {
 
-   enum Lexeme
+   class ContextBuilder final
     {
-      INVALID,
-      END_OF_FILE,
-      LEXER_NEVER_RETURNS_THIS,
-
-      SEMICOLON,
-      RANGE,
-
-      CELL_REFERENCE,
-      IDENTIFIER,
-      NUMBER,
-      NAME,
-      STRING,
-
-      OPEN_PARENS,
-      CLOSE_PARENS,
-
-      EQUALITY,
-      INEQUALITY,
-      GREATER_THAN,
-      LESS_THAN,
-      GREATER_THAN_OR_EQUAL_TO,
-      LESS_THAN_OR_EQUAL_TO,
-      PLUS,
-      MINUS,
-      MULTIPLY,
-      DIVIDE,
-      CAT
+   public:
+      static void createGlobalScope(Backwards::Engine::Scope&);
     };
 
- } // namespace Input
+ } // namespace Parser
 
  } // namespace Forwards
 
-#endif /* FORWARDS_INPUT_LEXEMES_H */
+#endif /* FORWARDS_PARSER_CONTEXTBUILDER_H */

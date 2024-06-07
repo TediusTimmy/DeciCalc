@@ -32,7 +32,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef SCREEN_H
 #define SCREEN_H
 
-class SharedData
+enum MODE
+ {
+   CELL_MODIFICATION,
+   GOTO_CELL
+ };
+
+class SharedData final
  {
 public:
    size_t c_col;
@@ -46,8 +52,14 @@ public:
    size_t editChar;
    bool useComma;
 
+   std::string tempString;
+   std::string origString;
+   MODE mode;
+
+   std::deque<int> inputBuffer;
+
    size_t def_col_width;
-   std::map<size_t, int> col_widths;
+   std::vector<int> col_widths;
 
    Forwards::Engine::CellType yankedType;
    std::shared_ptr<Forwards::Engine::Expression> yanked;
@@ -57,9 +69,10 @@ public:
    bool saveRequested;
  };
 
-void InitScreen(void);
+void InitScreen(SharedData&);
 void UpdateScreen(SharedData&);
 int ProcessInput(SharedData&);
+void WaitToSave(void);
 void DestroyScreen(void);
 
 #endif /* SCREEN_H */

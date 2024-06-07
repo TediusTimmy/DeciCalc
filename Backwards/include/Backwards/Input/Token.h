@@ -53,7 +53,7 @@ namespace Input
       size_t lineNumber;
       size_t lineLocation;
 
-      Token(Lexeme lexeme, std::string text, std::string source, size_t lineNo, size_t lineC) :
+      Token(Lexeme lexeme, const std::string& text, const std::string& source, size_t lineNo, size_t lineC) :
          lexeme(lexeme), text(text), sourceFile(source), lineNumber(lineNo), lineLocation(lineC) { }
 
       Token() : lexeme(INVALID), text(), sourceFile(), lineNumber(0U), lineLocation(0U) { }

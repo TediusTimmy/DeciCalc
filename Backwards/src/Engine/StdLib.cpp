@@ -54,8 +54,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sstream>
 #include <iomanip>
 #include <limits>
-#include <cmath>
-#include <ctime>
 
 #include "dm_double_pretty.h"
 
@@ -143,6 +141,25 @@ namespace Engine
             if ((index >= 0.0) && (index < static_cast<double>(static_cast<const Types::ArrayValue&>(*first).value.size())))
              {
                return static_cast<const Types::ArrayValue&>(*first).value[static_cast<size_t>(index)];
+             }
+            else
+             {
+               throw Types::TypedOperationException("Array Index Out-of-Bounds.");
+             }
+          }
+         else
+          {
+            throw Types::TypedOperationException("Error indexing with non-Float.");
+          }
+       }
+      else if (typeid(Types::CellRangeValue) == typeid(*first))
+       {
+         if (typeid(Types::FloatValue) == typeid(*second))
+          {
+            double index = dm_double_todouble(static_cast<const Types::FloatValue&>(*second).value);
+            if ((index >= 0.0) && (index < static_cast<double>(static_cast<const Types::CellRangeValue&>(*first).getSize())))
+             {
+               return static_cast<const Types::CellRangeValue&>(*first).getIndex(static_cast<size_t>(index));
              }
             else
              {
@@ -290,7 +307,7 @@ namespace Engine
           {
             std::shared_ptr<Types::ArrayValue> result = std::make_shared<Types::ArrayValue>();
             const std::vector<std::shared_ptr<Types::ValueType> >& source = static_cast<const Types::ArrayValue&>(*arg).value;
-            result->value.assign(source.begin() + 1, source.end());
+            result->value.assign(source.begin() + 1U, source.end());
             return result;
           }
          else
@@ -347,6 +364,10 @@ namespace Engine
       else if (typeid(Types::DictionaryValue) == typeid(*arg))
        {
          return std::make_shared<Types::FloatValue>(dm_double_fromdouble(static_cast<const Types::DictionaryValue&>(*arg).value.size()));
+       }
+      else if (typeid(Types::CellRangeValue) == typeid(*arg))
+       {
+         return std::make_shared<Types::FloatValue>(dm_double_fromdouble(static_cast<const Types::CellRangeValue&>(*arg).getSize()));
        }
       else
        {
@@ -492,13 +513,13 @@ namespace Engine
        { \
          if (typeid(Types::FloatValue) == typeid(*second)) \
           { \
-            double fVal = dm_double_todouble(static_cast<const Types::FloatValue&>(*first).value); \
-            double sVal = dm_double_todouble(static_cast<const Types::FloatValue&>(*second).value); \
-            if (true == std::isnan(fVal)) \
+            dm_double fVal = static_cast<const Types::FloatValue&>(*first).value; \
+            dm_double sVal = static_cast<const Types::FloatValue&>(*second).value; \
+            if (0 != dm_double_isnan(fVal)) \
              { \
                return first; \
              } \
-            else if (true == std::isnan(sVal)) \
+            else if (0 != dm_double_isnan(sVal)) \
              { \
                return second; \
              } \

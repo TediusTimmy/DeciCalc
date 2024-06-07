@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Forwards/Types/ValueType.h"
 
+#include "BatchMode.h"
 #include "GetAndSet.h"
 #include "LibraryLoader.h"
 #include "SaveFile.h"
@@ -60,8 +61,36 @@ int main (int argc, char ** argv)
    context.theSheet = &sheet;
    Forwards::Engine::GetterMap map;
    context.map = &map;
+   Forwards::Engine::NameMap names;
+   context.names = &names;
 
-   int file = LoadLibraries(argc, argv, context);
+   std::list<std::string> batches;
+   std::vector<std::pair<std::string, std::string> > argLibs;
+   std::vector<std::pair<std::string, std::string> > fileLibs;
+
+   int file = PreLoadLibraries(argc, argv, argLibs);
+   file = ReadBatches(argc, argv, file, batches);
+
+
+   SharedData state;
+
+   state.c_row = 0U;
+   state.c_col = 0U;
+   state.tr_row = 0U;
+   state.tr_col = 0U;
+
+   state.inputMode = false;
+   state.insertMode = true;
+   state.useComma = false;
+
+   state.def_col_width = DEF_COLUMN_WIDTH;
+
+   state.yankedType = Forwards::Engine::ERROR;
+
+   state.context = &context;
+
+   state.saveRequested = false;
+
 
    std::string saveFileName = "untitled.html";
    if (file < argc)
@@ -75,44 +104,33 @@ int main (int argc, char ** argv)
          saveFileName = argv[file];
        }
 
-      LoadFile(argv[file], &sheet);
+      LoadFile(argv[file], &sheet, state.col_widths, state.def_col_width, fileLibs);
     }
 
-   SharedData state;
+
+   fileLibs.insert(fileLibs.end(), argLibs.begin(), argLibs.end());
+   LoadLibraries(fileLibs, context);
 
 
-   state.c_row = 0U;
-   state.c_col = 0U;
-   state.tr_row = 0U;
-   state.tr_col = 0U;
-
-   state.inputMode = false;
-   state.insertMode = true;
-   state.useComma = false;
-
-   state.def_col_width = 9;
-
-   state.yankedType = Forwards::Engine::ERROR;
-
-   state.context = &context;
-
-   state.saveRequested = false;
-
-
-   if (0U != sheet.max_row) // We loaded saved data, so recalculate the sheet.
+   if (false == batches.empty())
     {
-      sheet.recalc(context);
+      if (0U != sheet.max_row) // We loaded saved data, so recalculate the sheet.
+       {
+         sheet.recalc(context);
+       }
+      RunBatches(batches, context);
+      return 0;
     }
 
 
-   InitScreen();
+   InitScreen(state);
    UpdateScreen(state);
    while (ProcessInput(state))
     {
       UpdateScreen(state);
       if (true == state.saveRequested)
        {
-         SaveFile(saveFileName, &sheet);
+         SaveFile(saveFileName, &sheet, state.col_widths, state.def_col_width, fileLibs);
          state.saveRequested = false;
        }
     }
@@ -120,8 +138,18 @@ int main (int argc, char ** argv)
 
    if (true == state.saveRequested)
     {
-      SaveFile(saveFileName, &sheet);
-      state.saveRequested = false;
+      WaitToSave();
+      SaveFile(saveFileName, &sheet, state.col_widths, state.def_col_width, fileLibs);
+    }
+
+   if (false == logger.logs.empty())
+    {
+      std::cerr << "These messages were logged:" << std::endl;
+      for (const auto& bob : logger.logs)
+       {
+         std::cerr << bob << std::endl;
+       }
+      logger.logs.clear();
     }
 
    return 0;

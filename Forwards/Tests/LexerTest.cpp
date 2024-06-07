@@ -91,6 +91,8 @@ TEST(LexerTests, testEverythingAndTheKitchenSink)
    tests.push_back(std::make_pair("1,2E-3",               Forwards::Input::NUMBER));
    tests.push_back(std::make_pair("@program",             Forwards::Input::IDENTIFIER));
    tests.push_back(std::make_pair("@",                    Forwards::Input::INVALID));
+   tests.push_back(std::make_pair("_$3_fiddy",            Forwards::Input::NAME));
+   tests.push_back(std::make_pair("_",                    Forwards::Input::INVALID));
    tests.push_back(std::make_pair("=",                    Forwards::Input::EQUALITY));
    tests.push_back(std::make_pair("<>",                   Forwards::Input::INEQUALITY));
    tests.push_back(std::make_pair(":",                    Forwards::Input::RANGE));
@@ -130,6 +132,14 @@ TEST(LexerTests, testEverythingAndTheKitchenSink)
    tests.push_back(std::make_pair("A$1000000000",         Forwards::Input::INVALID));
    tests.push_back(std::make_pair("$A$2",                 Forwards::Input::CELL_REFERENCE));
    tests.push_back(std::make_pair("A0",                   Forwards::Input::INVALID));
+   tests.push_back(std::make_pair("\"Hello\"",            Forwards::Input::STRING));
+   tests.push_back(std::make_pair("\"Hello There\"",      Forwards::Input::STRING));
+   tests.push_back(std::make_pair("\"Hello\nThere\"",     Forwards::Input::STRING));
+   tests.push_back(std::make_pair("\"Hello\"\"There\"",   Forwards::Input::STRING));
+   tests.push_back(std::make_pair("\"Hell\"\"\"\"Ther\"", Forwards::Input::STRING));
+   tests.push_back(std::make_pair("\"Hello\"\"\"",        Forwards::Input::STRING));
+   tests.push_back(std::make_pair("\"\"\"Hello\"",        Forwards::Input::STRING));
+   tests.push_back(std::make_pair("\"Hello There",        Forwards::Input::INVALID));
 
    for (std::vector<std::pair<std::string, Forwards::Input::Lexeme> >::const_iterator iter = tests.begin();
       iter != tests.end(); ++iter)

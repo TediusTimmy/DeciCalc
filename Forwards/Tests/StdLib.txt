@@ -97,3 +97,15 @@ set ROUND to function (x) is
    end
    return temp
 end
+
+set EVAL to function (x) is
+   set temp to EvalCell(x[0])
+   if !IsNil(temp) then
+      set temp to CellEval(temp)
+   end
+   return temp
+end
+
+set LET to function (x) is
+   return Let(EvalCell(x[0]); x[1])
+end

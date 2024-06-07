@@ -48,10 +48,10 @@ namespace Types
       dm_double value;
 
       FloatValue();
-      FloatValue(dm_double value);
+      explicit FloatValue(dm_double value);
 
       const std::string& getTypeName() const override;
-      std::string toString(size_t, size_t) const override;
+      std::string toString(size_t, size_t, bool) const override;
       ValueTypes getType() const override;
 
     };

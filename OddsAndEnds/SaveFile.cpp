@@ -37,13 +37,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Forwards/Parser/Parser.h"
 
+#include "Backwards/Input/Lexer.h"
+#include "Backwards/Input/StringInput.h"
+
+#include "GetAndSet.h"
+
 static void replaceAll(std::string& in, char ch, const std::string& with)
  {
    size_t c;
    c = in.rfind(ch, std::string::npos);
    while (std::string::npos != c)
     {
-      in = in.substr(0U, c) + with + in.substr(c + 1U, std::string::npos);
+      in.replace(c, 1U, with);
       if (0U != c)
          c = in.rfind(ch, c - 1U);
       else
@@ -57,10 +62,11 @@ static std::string harden(const std::string& in)
    replaceAll(result, '&', "&amp;");
    replaceAll(result, '<', "&lt;");
    replaceAll(result, '>', "&gt;");
+   replaceAll(result, '\n', "&sect;");
    return result;
  }
 
-void SaveFile(const std::string& fileName, Forwards::Engine::SpreadSheet* theSheet)
+void SaveFile(const std::string& fileName, Forwards::Engine::SpreadSheet* theSheet, const std::vector<int>& map, int def, const std::vector<std::pair<std::string, std::string> >& allLibs)
  {
    std::ofstream file (fileName.c_str(), std::ios::out);
    for (auto& column : theSheet->sheet)
@@ -86,11 +92,50 @@ void SaveFile(const std::string& fileName, Forwards::Engine::SpreadSheet* theShe
          theSheet->sheet.resize(s);
        }
     }
-   file << "<html><head><style>td { border: 1px solid black; }</style></head><body><table>" << std::endl;
+   if (false == allLibs.empty())
+    {
+      file << "<html><head><style>td { border: 1px solid black; }</style></head><body>" << std::endl;
+      for (const std::pair<std::string, std::string>& lib : allLibs)
+       {
+         file << "<b>" << harden(lib.first) << "</b><p>";
+         std::string stripped;
+         Backwards::Input::StringInput libText (lib.second);
+         Backwards::Input::Lexer lexer (libText, lib.first);
+         while (lexer.peekNextToken().lexeme != Backwards::Input::END_OF_FILE)
+          {
+            if (lexer.peekNextToken().lexeme != Backwards::Input::STRING)
+             {
+               stripped += lexer.getNextToken().text + " ";
+             }
+            else
+             {
+               stripped += "\"" + lexer.getNextToken().text + "\" ";
+             }
+          }
+         file << harden(stripped) << "</p>" << std::endl;
+       }
+      file << "<table>" << std::endl;
+    }
+   else
+    {
+      file << "<html><head><style>td { border: 1px solid black; }</style></head><body><table>" << std::endl;
+    }
    size_t col = 0U;
    for (auto& column : theSheet->sheet)
     {
-      file << "   <tr>";
+      int width = getWidth(map, col, def);
+      if (width == def)
+       {
+         file << "   <tr>";
+       }
+      else
+       {
+         file << "   <tr width=\"" << width << "\">";
+       }
+      if (0U == column.size())
+       {
+         file << "<td />"; // Insert one cell so that web browsers render the column.
+       }
       size_t row = 0U;
       for (auto& cell : column)
        {
@@ -111,7 +156,8 @@ void SaveFile(const std::string& fileName, Forwards::Engine::SpreadSheet* theShe
             else
              {
                std::string toPrint;
-               if (nullptr != cell->value.get()) toPrint = cell->value->toString(col, row, 0);
+               if (nullptr != cell->previousValue.get()) toPrint = cell->previousValue->toString(col, row);
+               else toPrint = cell->currentInput;
                file << "<td>&lt;" << harden(toPrint) << "</td>";
              }
           }
@@ -129,7 +175,7 @@ static void replaceAllEntities(std::string& in, const std::string& ent, const st
    c = in.rfind(ent, std::string::npos);
    while (std::string::npos != c)
     {
-      in = in.substr(0U, c) + with + in.substr(c + ent.length(), std::string::npos);
+      in.replace(c, ent.length(), with);
       if (0U != c)
          c = in.rfind(ent, c - 1U);
       else
@@ -140,13 +186,14 @@ static void replaceAllEntities(std::string& in, const std::string& ent, const st
 static std::string soften(const std::string& in)
  {
    std::string result = in;
+   replaceAllEntities(result, "&sect;", "\n");
    replaceAllEntities(result, "&gt;", ">");
    replaceAllEntities(result, "&lt;", "<");
    replaceAllEntities(result, "&amp;", "&");
    return result;
  }
 
-void LoadFile(const std::string& fileName, Forwards::Engine::SpreadSheet* sheet)
+void LoadFile(const std::string& fileName, Forwards::Engine::SpreadSheet* sheet, std::vector<int>& map, int def, std::vector<std::pair<std::string, std::string> >& fileLibs)
  {
    std::ifstream file (fileName.c_str(), std::ios::in);
    if (!file.good())
@@ -163,9 +210,10 @@ void LoadFile(const std::string& fileName, Forwards::Engine::SpreadSheet* sheet)
    std::getline(file, curCol);
    if ((0U != curCol.size()) && ('\r' == curCol[curCol.size() - 1]))
     {
-      curCol = curCol.substr(0U, curCol.size() - 1U);
+      curCol.resize(curCol.size() - 1U);
     }
-   if ("<html><head><style>td { border: 1px solid black; }</style></head><body><table>" != curCol) // I WILL REGRET THIS!
+   if (("<html><head><style>td { border: 1px solid black; }</style></head><body><table>" != curCol) &&
+      ("<html><head><style>td { border: 1px solid black; }</style></head><body>" != curCol)) // I WILL REGRET THIS!
     {
       sheet->initCellAt(0U, 0U);
       Forwards::Engine::Cell* cell = sheet->getCellAt(0U, 0U);
@@ -174,20 +222,78 @@ void LoadFile(const std::string& fileName, Forwards::Engine::SpreadSheet* sheet)
       return;
     }
 
+   if ("<html><head><style>td { border: 1px solid black; }</style></head><body>" == curCol)
+    {
+      curCol = "";
+      std::getline(file, curCol);
+      if ((0U != curCol.size()) && ('\r' == curCol[curCol.size() - 1]))
+       {
+         curCol.resize(curCol.size() - 1U);
+       }
+      while (("<table>" != curCol) && (true == file.good()))
+       {
+         size_t bn = curCol.find("<b>");
+         size_t en = curCol.find("</b>");
+         size_t bt = curCol.find("<p>");
+         size_t et = curCol.find("</p>");
+
+         if ((std::string::npos != bn) && (std::string::npos != en) && (std::string::npos != bt) && (std::string::npos != et))
+          {
+            fileLibs.push_back(std::make_pair(soften(curCol.substr(bn + 3U, en - bn - 3U)), soften(curCol.substr(bt + 3U, et - bt - 3U))));
+          }
+
+         curCol = "";
+         std::getline(file, curCol);
+         if ((0U != curCol.size()) && ('\r' == curCol[curCol.size() - 1]))
+          {
+            curCol.resize(curCol.size() - 1U);
+          }
+       }
+    }
+
    curCol = "";
    std::getline(file, curCol);
    if ((0U != curCol.size()) && ('\r' == curCol[curCol.size() - 1]))
     {
-      curCol = curCol.substr(0U, curCol.size() - 1U);
+      curCol.resize(curCol.size() - 1U);
     }
    size_t col = 0U;
    while (("</table></body></html>" != curCol) && (true == file.good()))
     {
-      size_t row = 0U;
       size_t n = curCol.find("<tr>");
+      if (std::string::npos == n) // Does this column have attributes?
+       {
+         n = curCol.find("<tr ");
+         if (std::string::npos != n) // Yes
+          {
+            size_t a = curCol.find("width=\"", n);
+            if (std::string::npos != a)
+             {
+               try
+                {
+                  int width = std::stoi(curCol.substr(a + 7, curCol.find('"', a + 7)));
+                  setWidth(map, col, width, def);
+                }
+               catch (const std::invalid_argument&)
+                {
+                }
+               catch (const std::out_of_range&)
+                {
+                }
+             }
+
+               // Set the next read position after the end of the current tag.
+            n = curCol.find('>', n);
+            if (std::string::npos != n)
+             {
+               n -= 4U;
+             }
+          }
+       }
 
       if (std::string::npos != n)
        {
+         size_t row = 0U;
          n = n + 4U;
          while (std::string::npos != n)
           {
@@ -234,8 +340,16 @@ void LoadFile(const std::string& fileName, Forwards::Engine::SpreadSheet* sheet)
              }
             else
              {
-                  // Skip junk.
-               n = curCol.find('<', n);
+                  // Skip junk. And don't get stuck in an infinite loop on a tag we don't understand.
+               size_t newn = curCol.find('<', n);
+               if (n != newn)
+                {
+                  n = newn;
+                }
+               else
+                {
+                  ++n;
+                }
              }
           }
        }
@@ -245,7 +359,7 @@ void LoadFile(const std::string& fileName, Forwards::Engine::SpreadSheet* sheet)
       std::getline(file, curCol);
       if ((0U != curCol.size()) && ('\r' == curCol[curCol.size() - 1]))
        {
-         curCol = curCol.substr(0U, curCol.size() - 1U);
+         curCol.resize(curCol.size() - 1U);
        }
     }
  }

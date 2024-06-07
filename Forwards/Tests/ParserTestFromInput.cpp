@@ -119,8 +119,8 @@ int main (int argc, char ** argv)
     }
 
    Forwards::Engine::SpreadSheet theSheet;
-   theSheet.sheet.emplace_back(std::vector<std::shared_ptr<Forwards::Engine::Cell> >());
-   theSheet.sheet[0].emplace_back(std::make_shared<Forwards::Engine::Cell>());
+   theSheet.sheet.emplace_back(std::vector<std::unique_ptr<Forwards::Engine::Cell> >());
+   theSheet.sheet[0].emplace_back(std::make_unique<Forwards::Engine::Cell>());
    context.theSheet = &theSheet;
 
    Forwards::Engine::CellFrame frame (theSheet.sheet[0][0].get(), 0U, 0U);

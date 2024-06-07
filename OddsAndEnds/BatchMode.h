@@ -29,48 +29,21 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef FORWARDS_INPUT_LEXEMES_H
-#define FORWARDS_INPUT_LEXEMES_H
+#ifndef BATCHMODE_H
+#define BATCHMODE_H
+
+#include <list>
 
 namespace Forwards
  {
-
-namespace Input
+namespace Engine
  {
+   class CallingContext;
+ }
+ }
 
-   enum Lexeme
-    {
-      INVALID,
-      END_OF_FILE,
-      LEXER_NEVER_RETURNS_THIS,
+   // Returns the argument that is at the end of the "-b" chain.
+int ReadBatches (int argc, char ** argv, int libEnd, std::list<std::string>& batches);
+void RunBatches (const std::list<std::string>& batches, Forwards::Engine::CallingContext& context);
 
-      SEMICOLON,
-      RANGE,
-
-      CELL_REFERENCE,
-      IDENTIFIER,
-      NUMBER,
-      NAME,
-      STRING,
-
-      OPEN_PARENS,
-      CLOSE_PARENS,
-
-      EQUALITY,
-      INEQUALITY,
-      GREATER_THAN,
-      LESS_THAN,
-      GREATER_THAN_OR_EQUAL_TO,
-      LESS_THAN_OR_EQUAL_TO,
-      PLUS,
-      MINUS,
-      MULTIPLY,
-      DIVIDE,
-      CAT
-    };
-
- } // namespace Input
-
- } // namespace Forwards
-
-#endif /* FORWARDS_INPUT_LEXEMES_H */
+#endif /* BATCHMODE_H */

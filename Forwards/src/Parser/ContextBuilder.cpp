@@ -29,48 +29,29 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef FORWARDS_INPUT_LEXEMES_H
-#define FORWARDS_INPUT_LEXEMES_H
+#include "Backwards/Parser/ContextBuilder.h"
+#include "Backwards/Engine/Statement.h"
+
+#include "Forwards/Parser/ContextBuilder.h"
+#include "Forwards/Engine/StdLib.h"
 
 namespace Forwards
  {
 
-namespace Input
+namespace Parser
  {
 
-   enum Lexeme
+   void ContextBuilder::createGlobalScope (Backwards::Engine::Scope& global)
     {
-      INVALID,
-      END_OF_FILE,
-      LEXER_NEVER_RETURNS_THIS,
+      Backwards::Parser::ContextBuilder::createGlobalScope(global);
 
-      SEMICOLON,
-      RANGE,
+    // 1
+      Backwards::Parser::ContextBuilder::addFunction("CellEval", std::make_shared<Backwards::Engine::StandardUnaryFunctionWithContext>(Engine::CellEval), 1U, global);
 
-      CELL_REFERENCE,
-      IDENTIFIER,
-      NUMBER,
-      NAME,
-      STRING,
+    // 1
+      Backwards::Parser::ContextBuilder::addFunction("Let", std::make_shared<Forwards::Engine::StandardBinaryFunctionWithContext>(Engine::Let), 2U, global);
+    }
 
-      OPEN_PARENS,
-      CLOSE_PARENS,
-
-      EQUALITY,
-      INEQUALITY,
-      GREATER_THAN,
-      LESS_THAN,
-      GREATER_THAN_OR_EQUAL_TO,
-      LESS_THAN_OR_EQUAL_TO,
-      PLUS,
-      MINUS,
-      MULTIPLY,
-      DIVIDE,
-      CAT
-    };
-
- } // namespace Input
+ } // namespace Parser
 
  } // namespace Forwards
-
-#endif /* FORWARDS_INPUT_LEXEMES_H */

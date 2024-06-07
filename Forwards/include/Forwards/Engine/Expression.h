@@ -79,10 +79,10 @@ namespace Engine
 
       Constant(const Input::Token&, const std::shared_ptr<Types::ValueType>&);
 
-      std::shared_ptr<Types::ValueType> evaluate (CallingContext&) const;
-      std::string toString(size_t, size_t, int) const;
+      std::shared_ptr<Types::ValueType> evaluate (CallingContext&) const override;
+      std::string toString(size_t, size_t, int) const override;
 
-      static std::shared_ptr<Types::ValueType> finalConst(std::shared_ptr<Types::CellRefValue>, CallingContext&, const Input::Token&);
+      static std::shared_ptr<Types::ValueType> finalConst(std::shared_ptr<Types::CellRefValue>, CallingContext&);
     };
 
 #define FFBinaryOperation(x) \
@@ -130,6 +130,19 @@ namespace Engine
       std::vector<std::shared_ptr<Expression> > args;
 
       FunctionCall(const Input::Token&, const std::shared_ptr<Backwards::Engine::Expression>&, const std::vector<std::shared_ptr<Expression> >&);
+
+      std::shared_ptr<Types::ValueType> evaluate (CallingContext&) const override;
+      std::string toString(size_t, size_t, int) const override;
+    };
+
+
+   class Name final : public Expression
+    {
+   public:
+      std::string name;
+      std::shared_ptr<Expression> arg;
+
+      Name(const Input::Token&, const std::string&);
 
       std::shared_ptr<Types::ValueType> evaluate (CallingContext&) const override;
       std::string toString(size_t, size_t, int) const override;

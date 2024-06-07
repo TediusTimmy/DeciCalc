@@ -29,39 +29,67 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include <map>
+#include <vector>
 
 #include "GetAndSet.h"
 
-int getWidth(const std::map<std::size_t, int>& map, std::size_t col, int def)
+int getWidth(const std::vector<int>& map, std::size_t col, int def)
  {
-   if (map.end() != map.find(col))
+   if (map.size() <= col)
     {
-      return map.find(col)->second;
+      return def;
     }
-   return def;
+   return map[col];
  }
 
-void incWidth(std::map<std::size_t, int>& map, std::size_t col, int def)
+void setWidth(std::vector<int>& map, std::size_t col, int width, int def)
  {
-   if (map.end() == map.find(col))
+   if ((width >= MIN_COLUMN_WIDTH) && (width <= MAX_COLUMN_WIDTH))
     {
-      map[col] = def;
+      if (map.size() <= col)
+       {
+         map.resize(col + 1U, def);
+       }
+      map[col] = width;
     }
-   if (40U != map[col])
+ }
+
+void incWidth(std::vector<int>& map, std::size_t col, int def)
+ {
+   if (map.size() <= col)
+    {
+      map.resize(col + 1U, def);
+    }
+   if (MAX_COLUMN_WIDTH != map[col])
     {
       ++map[col];
     }
  }
 
-void decWidth(std::map<std::size_t, int>& map, std::size_t col, int def)
+void decWidth(std::vector<int>& map, std::size_t col, int def)
  {
-   if (map.end() == map.find(col))
+   if (map.size() <= col)
     {
-      map[col] = def;
+      map.resize(col + 1U, def);
     }
-   if (1U != map[col])
+   if (MIN_COLUMN_WIDTH != map[col])
     {
       --map[col];
+    }
+ }
+
+void insertColumnBefore(std::vector<int>& map, std::size_t col, int def)
+ {
+   if (map.size() > col)
+    {
+      map.insert(map.begin() + col, def);
+    }
+ }
+
+void removeColumn(std::vector<int>& map, std::size_t col)
+ {
+   if (map.size() > col)
+    {
+      map.erase(map.begin() + col);
     }
  }

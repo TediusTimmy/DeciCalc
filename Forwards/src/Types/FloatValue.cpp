@@ -54,7 +54,7 @@ namespace Types
       return name;
     }
 
-   std::string FloatValue::toString(size_t, size_t) const
+   std::string FloatValue::toString(size_t, size_t, bool) const
     {
       char result [24];
       dm_double_toprettystring(value, result);

@@ -35,11 +35,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Forwards/Engine/CallingContext.h"
 #include "Forwards/Engine/SpreadSheet.h"
 #include "Forwards/Engine/Cell.h"
+#include "Forwards/Engine/StdLib.h"
 
 #include "Forwards/Engine/CellRangeExpand.h"
 #include "Forwards/Engine/CellRefEval.h"
 
 #include "Forwards/Parser/Parser.h"
+#include "Forwards/Parser/ContextBuilder.h"
 
 #include "Forwards/Types/FloatValue.h"
 #include "Forwards/Types/StringValue.h"
@@ -58,8 +60,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Backwards/Parser/SymbolTable.h"
 #include "Backwards/Parser/Parser.h"
-#include "Backwards/Parser/ContextBuilder.h"
 
+#include "Backwards/Types/FloatValue.h"
+#include "Backwards/Types/StringValue.h"
 #include "Backwards/Types/CellRangeValue.h"
 #include "Backwards/Types/CellRefValue.h"
 
@@ -1175,10 +1178,10 @@ TEST(EngineTests, testFinalConst)
    EXPECT_EQ(dm_double_fromdouble(6.0), std::dynamic_pointer_cast<Forwards::Types::FloatValue>(res)->value);
 
    std::shared_ptr<Forwards::Engine::Constant> F1 = std::make_shared<Forwards::Engine::Constant>(Forwards::Input::Token(), std::make_shared<Forwards::Types::CellRefValue>(false, -1, false, 0));
-   EXPECT_THROW(F1->evaluate(context), Backwards::Types::TypedOperationException);
+   EXPECT_NO_THROW(F1->evaluate(context));
 
    std::shared_ptr<Forwards::Engine::Constant> F2 = std::make_shared<Forwards::Engine::Constant>(Forwards::Input::Token(), std::make_shared<Forwards::Types::CellRefValue>(false, 0, false, -1));
-   EXPECT_THROW(F2->evaluate(context), Backwards::Types::TypedOperationException);
+   EXPECT_NO_THROW(F2->evaluate(context));
 
    std::shared_ptr<Forwards::Engine::Constant> B1 = std::make_shared<Forwards::Engine::Constant>(Forwards::Input::Token(), std::make_shared<Forwards::Types::CellRefValue>(false, 4, false, 1));
    std::shared_ptr<Forwards::Engine::Constant> B2 = std::make_shared<Forwards::Engine::Constant>(Forwards::Input::Token(), std::make_shared<Forwards::Types::CellRefValue>(false, 1, false, 4));
@@ -1197,6 +1200,7 @@ TEST(EngineTests, testFinalConst)
    res = B4->evaluate(context);
    ASSERT_TRUE(typeid(Forwards::Types::NilValue) == typeid(*res.get()));
 
+   shet.sheet[1][1]->previousValue.reset();
    shet.sheet[1][1]->inEvaluation = true;
    res = A1->evaluate(context);
    ASSERT_TRUE(typeid(Forwards::Types::NilValue) == typeid(*res.get()));
@@ -1279,7 +1283,7 @@ TEST(EngineTests, testFunctionsAndRanges)
 
    Backwards::Engine::Scope global;
    context.globalScope = &global;
-   Backwards::Parser::ContextBuilder::createGlobalScope(global); // Create the global scope before the table.
+   Forwards::Parser::ContextBuilder::createGlobalScope(global); // Create the global scope before the table.
    Backwards::Parser::GetterSetter gs;
    Backwards::Parser::SymbolTable table (gs, global);
    Backwards::Input::FileInput console ("../Tests/StdLib.txt");
@@ -1428,6 +1432,73 @@ TEST(EngineTests, testCellRangeExpand)
       // All operations on defaulted will core.
    //EXPECT_THROW(low.equal(defaulted), Backwards::Engine::ProgrammingException);
    //EXPECT_THROW(low.sort(defaulted), Backwards::Engine::ProgrammingException);
+
+   Backwards::Types::CellRangeValue smallest (std::make_shared<Forwards::Engine::CellRangeExpand>(std::make_shared<Forwards::Types::CellRangeValue>(0U, 0U, 0U, 0U)));
+   Backwards::Types::CellRangeValue med (std::make_shared<Forwards::Engine::CellRangeExpand>(std::make_shared<Forwards::Types::CellRangeValue>(3U, 5U, 7U, 9U)));
+   Backwards::Types::CellRangeValue also1 (std::make_shared<Forwards::Engine::CellRangeExpand>(std::make_shared<Forwards::Types::CellRangeValue>(3U, 4U, 3U, 9U)));
+   Backwards::Types::CellRangeValue also2 (std::make_shared<Forwards::Engine::CellRangeExpand>(std::make_shared<Forwards::Types::CellRangeValue>(3U, 4U, 7U, 4U)));
+
+   EXPECT_EQ(1U, smallest.getSize());
+   EXPECT_EQ(2U, low.getSize());
+   EXPECT_EQ(6U, also1.getSize());
+   EXPECT_EQ(5U, also2.getSize());
+
+   std::shared_ptr<Backwards::Types::ValueType> res;
+   std::shared_ptr<Forwards::Engine::CellRefEval> temp1;
+   std::shared_ptr<Forwards::Engine::CellRangeExpand> temp2;
+   std::shared_ptr<Forwards::Types::ValueType> ras;
+
+   res = smallest.getIndex(0U);
+   ASSERT_TRUE(typeid(Backwards::Types::CellRefValue) == typeid(*res.get()));
+   ASSERT_TRUE(typeid(Forwards::Engine::CellRefEval) == typeid(*std::dynamic_pointer_cast<Backwards::Types::CellRefValue>(res)->value.get()));
+   temp1 = std::dynamic_pointer_cast<Forwards::Engine::CellRefEval>(std::dynamic_pointer_cast<Backwards::Types::CellRefValue>(res)->value);
+   ASSERT_TRUE(typeid(Forwards::Engine::Constant) == typeid(*temp1->value.get()));
+   ASSERT_TRUE(typeid(Forwards::Types::CellRefValue) == typeid(*std::dynamic_pointer_cast<Forwards::Engine::Constant>(temp1->value)->value.get()));
+   ras = std::dynamic_pointer_cast<Forwards::Engine::Constant>(temp1->value)->value;
+   EXPECT_EQ(true, std::dynamic_pointer_cast<Forwards::Types::CellRefValue>(ras)->colAbsolute);
+   EXPECT_EQ(0U, std::dynamic_pointer_cast<Forwards::Types::CellRefValue>(ras)->colRef);
+   EXPECT_EQ(true, std::dynamic_pointer_cast<Forwards::Types::CellRefValue>(ras)->rowAbsolute);
+   EXPECT_EQ(0U, std::dynamic_pointer_cast<Forwards::Types::CellRefValue>(ras)->rowRef);
+
+   res = med.getIndex(1U);
+   ASSERT_TRUE(typeid(Backwards::Types::CellRangeValue) == typeid(*res.get()));
+   ASSERT_TRUE(typeid(Forwards::Engine::CellRangeExpand) == typeid(*std::dynamic_pointer_cast<Backwards::Types::CellRangeValue>(res)->value.get()));
+   temp2 = std::dynamic_pointer_cast<Forwards::Engine::CellRangeExpand>(std::dynamic_pointer_cast<Backwards::Types::CellRangeValue>(res)->value);
+   ASSERT_TRUE(typeid(Forwards::Types::CellRangeValue) == typeid(*temp2->value.get()));
+   ras = temp2->value;
+   EXPECT_EQ(4U, std::dynamic_pointer_cast<Forwards::Types::CellRangeValue>(ras)->col1);
+   EXPECT_EQ(5U, std::dynamic_pointer_cast<Forwards::Types::CellRangeValue>(ras)->row1);
+   EXPECT_EQ(4U, std::dynamic_pointer_cast<Forwards::Types::CellRangeValue>(ras)->col2);
+   EXPECT_EQ(9U, std::dynamic_pointer_cast<Forwards::Types::CellRangeValue>(ras)->row2);
+
+   res = also1.getIndex(2U);
+   ASSERT_TRUE(typeid(Backwards::Types::CellRefValue) == typeid(*res.get()));
+   ASSERT_TRUE(typeid(Forwards::Engine::CellRefEval) == typeid(*std::dynamic_pointer_cast<Backwards::Types::CellRefValue>(res)->value.get()));
+   temp1 = std::dynamic_pointer_cast<Forwards::Engine::CellRefEval>(std::dynamic_pointer_cast<Backwards::Types::CellRefValue>(res)->value);
+   ASSERT_TRUE(typeid(Forwards::Engine::Constant) == typeid(*temp1->value.get()));
+   ASSERT_TRUE(typeid(Forwards::Types::CellRefValue) == typeid(*std::dynamic_pointer_cast<Forwards::Engine::Constant>(temp1->value)->value.get()));
+   ras = std::dynamic_pointer_cast<Forwards::Engine::Constant>(temp1->value)->value;
+   EXPECT_EQ(true, std::dynamic_pointer_cast<Forwards::Types::CellRefValue>(ras)->colAbsolute);
+   EXPECT_EQ(3U, std::dynamic_pointer_cast<Forwards::Types::CellRefValue>(ras)->colRef);
+   EXPECT_EQ(true, std::dynamic_pointer_cast<Forwards::Types::CellRefValue>(ras)->rowAbsolute);
+   EXPECT_EQ(6U, std::dynamic_pointer_cast<Forwards::Types::CellRefValue>(ras)->rowRef);
+
+   res = also2.getIndex(2U);
+   ASSERT_TRUE(typeid(Backwards::Types::CellRefValue) == typeid(*res.get()));
+   ASSERT_TRUE(typeid(Forwards::Engine::CellRefEval) == typeid(*std::dynamic_pointer_cast<Backwards::Types::CellRefValue>(res)->value.get()));
+   temp1 = std::dynamic_pointer_cast<Forwards::Engine::CellRefEval>(std::dynamic_pointer_cast<Backwards::Types::CellRefValue>(res)->value);
+   ASSERT_TRUE(typeid(Forwards::Engine::Constant) == typeid(*temp1->value.get()));
+   ASSERT_TRUE(typeid(Forwards::Types::CellRefValue) == typeid(*std::dynamic_pointer_cast<Forwards::Engine::Constant>(temp1->value)->value.get()));
+   ras = std::dynamic_pointer_cast<Forwards::Engine::Constant>(temp1->value)->value;
+   EXPECT_EQ(true, std::dynamic_pointer_cast<Forwards::Types::CellRefValue>(ras)->colAbsolute);
+   EXPECT_EQ(5U, std::dynamic_pointer_cast<Forwards::Types::CellRefValue>(ras)->colRef);
+   EXPECT_EQ(true, std::dynamic_pointer_cast<Forwards::Types::CellRefValue>(ras)->rowAbsolute);
+   EXPECT_EQ(4U, std::dynamic_pointer_cast<Forwards::Types::CellRefValue>(ras)->rowRef);
+
+   EXPECT_THROW(smallest.getIndex(2U), Backwards::Engine::ProgrammingException);
+   EXPECT_THROW(med.getIndex(9U), Backwards::Engine::ProgrammingException);
+   EXPECT_THROW(also1.getIndex(8U), Backwards::Engine::ProgrammingException);
+   EXPECT_THROW(also2.getIndex(7U), Backwards::Engine::ProgrammingException);
  }
 
 TEST(EngineTests, testCellRefEval)
@@ -1455,4 +1526,114 @@ TEST(EngineTests, testCellRefEval)
       // All operations on defaulted will core.
    //EXPECT_THROW(low.equal(defaulted), Backwards::Engine::ProgrammingException);
    //EXPECT_THROW(low.sort(defaulted), Backwards::Engine::ProgrammingException);
+ }
+
+TEST(EngineTests, testCellRefEval_EqualCases)
+ {
+   Backwards::Types::CellRefValue un (std::make_shared<Forwards::Engine::CellRefEval>(
+      std::make_shared<Forwards::Engine::Constant>(Forwards::Input::Token(), std::make_shared<Forwards::Types::CellRefValue>(false, 0, false, 0))));
+   Backwards::Types::CellRefValue deux (std::make_shared<Forwards::Engine::CellRefEval>(
+      std::make_shared<Forwards::Engine::Constant>(Forwards::Input::Token(), std::make_shared<Forwards::Types::CellRefValue>(true, 0, false, 0))));
+   Backwards::Types::CellRefValue trois (std::make_shared<Forwards::Engine::CellRefEval>(
+      std::make_shared<Forwards::Engine::Constant>(Forwards::Input::Token(), std::make_shared<Forwards::Types::CellRefValue>(false, 0, true, 0))));
+   Backwards::Types::CellRefValue quatre (std::make_shared<Forwards::Engine::CellRefEval>(
+      std::make_shared<Forwards::Engine::Constant>(Forwards::Input::Token(), std::make_shared<Forwards::Types::CellRefValue>(false, 1, false, 0))));
+   Backwards::Types::CellRefValue cinq (std::make_shared<Forwards::Engine::CellRefEval>(
+      std::make_shared<Forwards::Engine::Constant>(Forwards::Input::Token(), std::make_shared<Forwards::Types::CellRefValue>(false, 0, false, 1))));
+   Backwards::Types::CellRefValue six (std::make_shared<Forwards::Engine::CellRefEval>(
+      std::make_shared<Forwards::Engine::Constant>(Forwards::Input::Token(), std::make_shared<Forwards::Types::CellRefValue>(false, 0, false, 0))));
+
+   EXPECT_FALSE(un.equal(deux));
+   EXPECT_FALSE(un.equal(trois));
+   EXPECT_FALSE(un.equal(quatre));
+   EXPECT_FALSE(un.equal(cinq));
+   EXPECT_TRUE(un.equal(six));
+
+   EXPECT_TRUE(un.sort(deux) | deux.sort(un));
+   EXPECT_TRUE(un.sort(trois) | trois.sort(un));
+   EXPECT_TRUE(un.sort(quatre) | quatre.sort(un));
+   EXPECT_TRUE(un.sort(cinq) | cinq.sort(un));
+   EXPECT_FALSE(un.sort(six) | six.sort(un));
+ }
+
+TEST(EngineTests, testCellRangeExpand_EqualCases)
+ {
+   Backwards::Types::CellRangeValue un (std::make_shared<Forwards::Engine::CellRangeExpand>(std::make_shared<Forwards::Types::CellRangeValue>(0U, 0U, 1U, 1U)));
+   Backwards::Types::CellRangeValue deux (std::make_shared<Forwards::Engine::CellRangeExpand>(std::make_shared<Forwards::Types::CellRangeValue>(1U, 0U, 1U, 1U)));
+   Backwards::Types::CellRangeValue trois (std::make_shared<Forwards::Engine::CellRangeExpand>(std::make_shared<Forwards::Types::CellRangeValue>(0U, 1U, 1U, 1U)));
+   Backwards::Types::CellRangeValue quatre (std::make_shared<Forwards::Engine::CellRangeExpand>(std::make_shared<Forwards::Types::CellRangeValue>(0U, 0U, 2U, 1U)));
+   Backwards::Types::CellRangeValue cinq (std::make_shared<Forwards::Engine::CellRangeExpand>(std::make_shared<Forwards::Types::CellRangeValue>(0U, 0U, 1U, 2U)));
+   Backwards::Types::CellRangeValue six (std::make_shared<Forwards::Engine::CellRangeExpand>(std::make_shared<Forwards::Types::CellRangeValue>(0U, 0U, 1U, 1U)));
+
+   EXPECT_FALSE(un.equal(deux));
+   EXPECT_FALSE(un.equal(trois));
+   EXPECT_FALSE(un.equal(quatre));
+   EXPECT_FALSE(un.equal(cinq));
+   EXPECT_TRUE(un.equal(six));
+
+   EXPECT_TRUE(un.sort(deux) | deux.sort(un));
+   EXPECT_TRUE(un.sort(trois) | trois.sort(un));
+   EXPECT_TRUE(un.sort(quatre) | quatre.sort(un));
+   EXPECT_TRUE(un.sort(cinq) | cinq.sort(un));
+   EXPECT_FALSE(un.sort(six) | six.sort(un));
+ }
+
+TEST(EngineTests, testCellEval)
+ {
+   std::shared_ptr<Backwards::Types::ValueType> res;
+   Forwards::Engine::CallingContext context;
+   StringLogger logger;
+   context.logger = &logger;
+
+   Forwards::Engine::SpreadSheet shet;
+   context.theSheet = &shet;
+
+   shet.sheet.resize(1U);
+   shet.sheet[0].resize(1U);
+
+   shet.sheet[0][0] = std::make_unique<Forwards::Engine::Cell>();
+
+   Forwards::Engine::CellFrame frame (shet.sheet[0][0].get(), 0U, 0U);
+   EXPECT_EQ(nullptr, context.topCell());
+   context.pushCell(&frame);
+
+   Forwards::Engine::GetterMap map;
+   context.map = &map;
+
+   res = Forwards::Engine::CellEval(context, std::make_shared<Backwards::Types::StringValue>("2 + 3"));
+
+   ASSERT_TRUE(typeid(Backwards::Types::FloatValue) == typeid(*res.get()));
+   EXPECT_EQ(dm_double_fromdouble(5.0), std::dynamic_pointer_cast<Backwards::Types::FloatValue>(res)->value);
+
+   EXPECT_THROW(Forwards::Engine::CellEval(context, std::make_shared<Backwards::Types::FloatValue>(dm_double_fromdouble(23.0))), Backwards::Types::TypedOperationException);
+   EXPECT_THROW(Forwards::Engine::CellEval(context, std::make_shared<Backwards::Types::StringValue>("Hello")), Backwards::Types::TypedOperationException);
+
+   Backwards::Engine::CallingContext badContext;
+   EXPECT_THROW(Forwards::Engine::CellEval(badContext, std::make_shared<Backwards::Types::StringValue>("2 + 3")), Backwards::Engine::ProgrammingException);
+ }
+
+TEST(EngineTests, testName)
+ {
+   std::shared_ptr<Forwards::Engine::Constant> one = std::make_shared<Forwards::Engine::Constant>(Forwards::Input::Token(), makeFloatValue(6.0));
+   std::shared_ptr<Forwards::Types::ValueType> res;
+   Forwards::Engine::CallingContext context;
+   StringLogger logger;
+   context.logger = &logger;
+   Forwards::Engine::NameMap names;
+   context.names = &names;
+   names.insert(std::make_pair("_Billy", one));
+
+   Forwards::Engine::Name name (Forwards::Input::Token(), "_Billy");
+   res = name.evaluate(context);
+
+   ASSERT_TRUE(typeid(Forwards::Types::FloatValue) == typeid(*res.get()));
+   EXPECT_EQ(dm_double_fromdouble(6.0), std::dynamic_pointer_cast<Forwards::Types::FloatValue>(res)->value);
+   EXPECT_EQ("_Billy", name.toString(1U, 1U, 0));
+
+
+   Forwards::Engine::Name nameBad (Forwards::Input::Token(), "_Johnny");
+   res = nameBad.evaluate(context);
+
+   EXPECT_TRUE(typeid(Forwards::Types::NilValue) == typeid(*res.get()));
+   EXPECT_EQ("_Johnny", nameBad.toString(1U, 1U, 0));
  }

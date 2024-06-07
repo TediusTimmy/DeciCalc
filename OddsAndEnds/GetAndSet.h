@@ -32,8 +32,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef GETANDSET_H
 #define GETANDSET_H
 
-int getWidth(const std::map<std::size_t, int>& map, std::size_t col, int def);
-void incWidth(std::map<std::size_t, int>& map, std::size_t col, int def);
-void decWidth(std::map<std::size_t, int>& map, std::size_t col, int def);
+#define MAX_COLUMN_WIDTH 40
+#define MIN_COLUMN_WIDTH 1
+#define DEF_COLUMN_WIDTH 9
+
+int getWidth(const std::vector<int>& map, std::size_t col, int def);
+void setWidth(std::vector<int>& map, std::size_t col, int width, int def);
+void incWidth(std::vector<int>& map, std::size_t col, int def);
+void decWidth(std::vector<int>& map, std::size_t col, int def);
+
+void insertColumnBefore(std::vector<int>& map, std::size_t col, int def);
+void removeColumn(std::vector<int>& map, std::size_t col);
 
 #endif /* GETANDSET_H */

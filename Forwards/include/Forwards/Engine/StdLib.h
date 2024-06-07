@@ -29,48 +29,44 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef FORWARDS_INPUT_LEXEMES_H
-#define FORWARDS_INPUT_LEXEMES_H
+#ifndef FORWARDS_ENGINE_STDLIB_H
+#define FORWARDS_ENGINE_STDLIB_H
+
+#include "Backwards/Engine/CallingContext.h"
+#include "Backwards/Engine/Statement.h"
+#include "Backwards/Types/ValueType.h"
 
 namespace Forwards
  {
 
-namespace Input
+namespace Engine
  {
 
-   enum Lexeme
+#define STDLIB_UNARY_DECL_WITH_CONTEXT(x) \
+   std::shared_ptr<Backwards::Types::ValueType> x (Backwards::Engine::CallingContext& context, const std::shared_ptr<Backwards::Types::ValueType>& arg)
+
+   STDLIB_UNARY_DECL_WITH_CONTEXT(CellEval);
+
+
+   typedef std::shared_ptr<Backwards::Types::ValueType> (*BinaryFunctionPointerWithContext) (Backwards::Engine::CallingContext& context,
+      const std::shared_ptr<Backwards::Types::ValueType>&, const std::shared_ptr<Backwards::Types::ValueType>&);
+
+   class StandardBinaryFunctionWithContext final : public Backwards::Engine::Statement
     {
-      INVALID,
-      END_OF_FILE,
-      LEXER_NEVER_RETURNS_THIS,
-
-      SEMICOLON,
-      RANGE,
-
-      CELL_REFERENCE,
-      IDENTIFIER,
-      NUMBER,
-      NAME,
-      STRING,
-
-      OPEN_PARENS,
-      CLOSE_PARENS,
-
-      EQUALITY,
-      INEQUALITY,
-      GREATER_THAN,
-      LESS_THAN,
-      GREATER_THAN_OR_EQUAL_TO,
-      LESS_THAN_OR_EQUAL_TO,
-      PLUS,
-      MINUS,
-      MULTIPLY,
-      DIVIDE,
-      CAT
+   public:
+      BinaryFunctionPointerWithContext function;
+      explicit StandardBinaryFunctionWithContext(BinaryFunctionPointerWithContext);
+      std::shared_ptr<Backwards::Engine::FlowControl> execute (Backwards::Engine::CallingContext&) const override;
     };
 
- } // namespace Input
+#define STDLIB_BINARY_DECL_WITH_CONTEXT(x) \
+   std::shared_ptr<Backwards::Types::ValueType> x (Backwards::Engine::CallingContext& context, \
+      const std::shared_ptr<Backwards::Types::ValueType>& first, const std::shared_ptr<Backwards::Types::ValueType>& second)
+
+   STDLIB_BINARY_DECL_WITH_CONTEXT(Let);
+
+ } // namespace Engine
 
  } // namespace Forwards
 
-#endif /* FORWARDS_INPUT_LEXEMES_H */
+#endif /* FORWARDS_ENGINE_STDLIB_H */
