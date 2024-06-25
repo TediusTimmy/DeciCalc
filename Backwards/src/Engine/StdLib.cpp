@@ -552,13 +552,26 @@ namespace Engine
        } \
     }
 
+#define BASICONEARGMATHDEFNBOOL(x,y,z) \
+   STDLIB_UNARY_DECL(x) \
+    { \
+      if (typeid(Types::FloatValue) == typeid(*arg)) \
+       { \
+         return 0 != y(static_cast<const Types::FloatValue&>(*arg).value) ? ConstantsSingleton::getInstance().FLOAT_ONE : ConstantsSingleton::getInstance().FLOAT_ZERO; \
+       } \
+      else \
+       { \
+         throw Types::TypedOperationException("Error trying to compute " z " of non-Float."); \
+       } \
+    }
+
    BASICONEARGMATHDEFN(Abs, dm_double_fabs, "absolute value")
    BASICONEARGMATHDEFN(Round, dm_double_round, "rounded value")
    BASICONEARGMATHDEFN(Floor, dm_double_floor, "rounded to negative infinity")
    BASICONEARGMATHDEFN(Ceil, dm_double_ceil, "rounded to positive infinity")
-   BASICONEARGMATHDEFN(IsInfinity, dm_double_isinf, "is infinity")
+   BASICONEARGMATHDEFNBOOL(IsInfinity, dm_double_isinf, "is infinity")
     // Well, technically, I guess it SHOULD return true if the argument is not a Float....
-   BASICONEARGMATHDEFN(IsNaN, dm_double_isnan, "is special not-a-number value")
+   BASICONEARGMATHDEFNBOOL(IsNaN, dm_double_isnan, "is special not-a-number value")
 
    STDLIB_UNARY_DECL(Sqr)
     {
