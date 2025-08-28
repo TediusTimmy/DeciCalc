@@ -55,7 +55,7 @@ const int NO_INPUT_SLEEP_MILLIS = 10; // 100 Hz (when no input; always AFAP when
 const size_t MAX_ROW = 999999998U; // Yes, minus one.
 const size_t MAX_COL = 18277U;
 
-std::atomic<bool> blinky {true};
+std::atomic<bool> recalcSheet {true};
 std::thread updateThread;
 
 void GetRC(const std::string& from, int64_t& col, int64_t& row)
@@ -144,10 +144,10 @@ void sheetrun (SharedData& data)
    std::chrono::system_clock::time_point last;
    for (;;)
     {
-      if (true == blinky)
+      if (true == recalcSheet)
        {
          data.context->theSheet->recalc(*data.context);
-         blinky = false;
+         recalcSheet = false;
        }
       last = std::chrono::system_clock::now() + std::chrono::milliseconds(RECALC_POLL_MILLIS);
       std::this_thread::sleep_until(last);
@@ -225,7 +225,7 @@ void UpdateScreen(SharedData& data)
        {
          for (int i = x - 16; i > 0; --i) addch(' ');
        }
-      if (true == blinky)
+      if (true == recalcSheet)
        {
          addch('#');
        }
@@ -250,7 +250,7 @@ void UpdateScreen(SharedData& data)
       if (nullptr != curCell)
        {
             // unfinished VALUE : parse current contents
-         if ((false == blinky) && (Forwards::Engine::VALUE == curCell->type) && (nullptr == curCell->value))
+         if ((false == recalcSheet) && (Forwards::Engine::VALUE == curCell->type) && (nullptr == curCell->value))
           {
             data.context->inUserInput = true;
             --data.context->generation;
@@ -394,12 +394,16 @@ void UpdateScreen(SharedData& data)
           {
             if ((data.c_col == cc) && (data.c_row == cr))
              {
-               attron(COLOR_PAIR(2));
+               attron(COLOR_PAIR(1));
                if (false == data.inputMode)
                 {
                   mx = (2 * cx + nextWidth) / 2; // Middle of the cell
                   my = j;
                 }
+             }
+            else if ((data.c_col == cc) || (data.c_row == cr))
+             {
+               attron(COLOR_PAIR(2));
              }
             else
              {
@@ -726,7 +730,7 @@ int ProcessInput(SharedData& data)
             curCell->currentInput = data.tempString;
             curCell->value.reset();
             curCell->previousValue.reset();
-            blinky = true;
+            recalcSheet = true;
           }
          else if (GOTO_CELL == data.mode)
           {
@@ -743,7 +747,7 @@ int ProcessInput(SharedData& data)
             curCell->currentInput = data.tempString;
             data.tempString = "";
             data.origString = "";
-            blinky = true;
+            recalcSheet = true;
             done = false;
             if (KEY_NPAGE == c)
              {
@@ -882,7 +886,7 @@ int ProcessInput(SharedData& data)
       data.tr_row = 0U;
       break;
    case '<':
-      if (true == blinky) break;
+      if (true == recalcSheet) break;
     {
       if (nullptr == curCell)
        {
@@ -905,7 +909,7 @@ int ProcessInput(SharedData& data)
     }
       break;
    case '=':
-      if (true == blinky) break;
+      if (true == recalcSheet) break;
     {
       if (nullptr == curCell)
        {
@@ -941,11 +945,11 @@ int ProcessInput(SharedData& data)
        }
       break;
    case '!':
-      blinky = true;
+      recalcSheet = true;
       break;
    case 'd':
       if (false == updateChOrFail(c, data)) break;
-      if (true == blinky) break;
+      if (true == recalcSheet) break;
       switch (c)
        {
       case 'd':
@@ -958,11 +962,11 @@ int ProcessInput(SharedData& data)
          data.context->theSheet->clearRow(data.c_row);
          break;
        }
-      blinky = true;
+      recalcSheet = true;
       break;
    case 'y':
       if (false == updateChOrFail(c, data)) break;
-      if (true == blinky) break;
+      if (true == recalcSheet) break;
       if ('y' == c)
        {
          if ((nullptr != curCell) && (nullptr != curCell->value.get()))
@@ -979,7 +983,7 @@ int ProcessInput(SharedData& data)
       break;
    case 'p':
       if (false == updateChOrFail(c, data)) break;
-      if (true == blinky) break;
+      if (true == recalcSheet) break;
       if ('p' == c)
        {
          if (Forwards::Engine::ERROR == data.yankedType) break;
@@ -990,11 +994,11 @@ int ProcessInput(SharedData& data)
           }
          curCell->type = data.yankedType;
          curCell->value = data.yanked;
-         blinky = true;
+         recalcSheet = true;
        }
       break;
    case 'e':
-      if (true == blinky) break;
+      if (true == recalcSheet) break;
     {
       if (nullptr != curCell)
        {
@@ -1049,7 +1053,7 @@ int ProcessInput(SharedData& data)
       data.useComma = !data.useComma;
       break;
    case '+':
-      if (true == blinky) break;
+      if (true == recalcSheet) break;
     {
       if (nullptr == curCell)
        {
@@ -1154,7 +1158,7 @@ int ProcessInput(SharedData& data)
       break;
    case 'x':
       if (false == updateChOrFail(c, data)) break;
-      if (true == blinky) break;
+      if (true == recalcSheet) break;
       switch (c)
        {
       case 'x':
@@ -1171,11 +1175,11 @@ int ProcessInput(SharedData& data)
          data.context->theSheet->removeRow(data.c_row);
          break;
        }
-      blinky = true;
+      recalcSheet = true;
       break;
    case 'i':
       if (false == updateChOrFail(c, data)) break;
-      if (true == blinky) break;
+      if (true == recalcSheet) break;
       switch (c)
        {
       case 'i':
@@ -1189,11 +1193,11 @@ int ProcessInput(SharedData& data)
          data.context->theSheet->insertRowBefore(data.c_row);
          break;
        }
-      blinky = true;
+      recalcSheet = true;
       break;
    case 'o':
       if (false == updateChOrFail(c, data)) break;
-      if (true == blinky) break;
+      if (true == recalcSheet) break;
       switch (c)
        {
       case 'o':
@@ -1207,11 +1211,11 @@ int ProcessInput(SharedData& data)
          data.context->theSheet->insertRowBefore(data.c_row + 1U);
          break;
        }
-      blinky = true;
+      recalcSheet = true;
       break;
    case 'v':
       if (false == updateChOrFail(c, data)) break;
-      if (true == blinky) break;
+      if (true == recalcSheet) break;
       if ('v' == c)
        {
          if (nullptr != curCell)
@@ -1235,7 +1239,7 @@ int ProcessInput(SharedData& data)
 void WaitToSave(void)
  {
    std::chrono::system_clock::time_point last;
-   while (true == blinky)
+   while (true == recalcSheet)
     {
       last = std::chrono::system_clock::now() + std::chrono::milliseconds(RECALC_POLL_MILLIS);
       std::this_thread::sleep_until(last);

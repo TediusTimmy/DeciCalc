@@ -45,25 +45,45 @@ Command Line
 
 Commands
 --------
-* Arrow keys : navigate.
-* Page Up / Page Down : move to the next screen of rows.
+* Arrow keys : navigate. One can also use the vi keys `hjkl`.
+* Page Up / Page Down : move to the next screen of rows. One can also use `JK`.
+* `H` / `L` : move to the next screen of columns.
 * Home : goto cell A1
-* `g` : type in a cell name, then enter, and the current cell cursor will be moved to that cell. Note that you cannot see the cell name that you are typing.
-* `<` : start entering a label in this cell. Finish by pressing enter.
+* `g` : type in a cell name, then enter, and the current cell cursor will be moved to that cell.
+* `<` : start entering a label in this cell. Finish by pressing enter. (There are no centered or right-justified labels.)
 * `=` : start entering a formula in this cell. Finish by pressing enter.
-* `q` or F7 : exit. You must next press either 'y' to save and exit, or 'n' to not save and exit to actually exit.
+* `q` or F7 : exit. You must next press either 'y' to save and exit, or 'n' to not save and exit, in order to actually exit.
 * `!` : recalculate the sheet
 * `W` : save the sheet
-* `dd` : delete the current cell
+* `dd` : clear (delete) the current cell
+* `dr` : clear all cells in the current row
+* `dc` : clear all cells in the current column
 * `yy` : copy the current cell
-* `pp` : paste the current cell
+* `yd` : clear the copy buffer
+* `pp` : paste to the current cell
 * `e` : edit the current cell's contents
-* Shift left/right (also F9/F12 because ... Windows) : widen or narrow the current column. Columns can be between 1 and 40 cells wide. This is not a saved setting.
+* Shift left/right (also F9/F12 because ... Windows) : widen or narrow the current column. Columns can be between 1 and 40 cells wide.
 * `#` : Switch between column-major and row-major recalculation.
 * `$` : Switch between top-to-bottom and bottom-to-top recalculation.
 * `%` : Switch between left-to-right and right-to-left recalculation.
 * `,` : Toggle between using ',' and '.' as the decimal separator. This is not a saved setting.
 * `+` : If the current cell is empty, start entering a formula in this cell, else enter edit mode and append to this cell. If the current cell is a formula, append a '+' to the formula.
+* `:)` : Goto column A of the current row. (This is actually `0`, but I don't like lifting my finger from the shift key.)
+* `:$` : Goto the last column of the current row with meaningful data in it.
+* `:^` : Goto row 1 of the current column.
+* `:#` : Goto the last row of the current column with meaningful data in it.
+* `xx` : remove the current cell (shifting cells up)
+* `xX` : remove the current cell (shifting cells right)
+* `xr` : remove the current row
+* `xc` : remove the current column
+* `ii` : insert a cell at the current location (shifting cells down)
+* `ir` : insert a row at the current row
+* `ic` : insert a column at the current column
+* `oo` : open a cell at the current location (shifting cells right)
+* `or` : open a row after the current row
+* `oc` : open a column after the current column
+* `vv` : replace the current cell with its evaluated value
+* `` ` `` : Reset the screen (for systems that don't have SIGWINCH)
 
 The sheet automatically recalculates after you finish entering a label or formula, and when you paste a cell. If a cell references a cell that hasn't been computed yet, then that cell will be computed, unless we are already in the process of computing that cell (circular reference). This ought to remove most of the reasons for wanting to change the order of sheet computation (but, if you feel the need, it is very customizable).
 
