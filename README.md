@@ -55,12 +55,23 @@ Commands
 * `q` or F7 : exit. You must next press either 'y' to save and exit, or 'n' to not save and exit, in order to actually exit.
 * `!` : recalculate the sheet
 * `W` : save the sheet
+* `m` : set a copy marker at this cell location
 * `dd` : clear (delete) the current cell
 * `dr` : clear all cells in the current row
 * `dc` : clear all cells in the current column
+* `dm` : clear all cells in the rectangle between the current cell and the marker
 * `yy` : copy the current cell
 * `yd` : clear the copy buffer
+* `yc` : copy the current column
+* `yr` : copy the current row
+* `ym` : copy the rectangle between the current cell and the marker
 * `pp` : paste to the current cell
+* `pc` : paste to the current column
+* `pr` : paste to the current row
+* `pm` : paste the copied data as marked with this the top-right corner
+* `pM` : paste the copied data transposed with this the top-right corner
+* `pf` : paste the copied data into the rectangle between the current cell and the marker in column-major order
+* `pt` : paste the copied data into the rectangle between the current cell and the marker in row-major order
 * `e` : edit the current cell's contents
 * Shift left/right (also F9/F12 because ... Windows) : widen or narrow the current column. Columns can be between 1 and 40 cells wide.
 * `#` : Switch between column-major and row-major recalculation.
@@ -83,6 +94,9 @@ Commands
 * `or` : open a row after the current row
 * `oc` : open a column after the current column
 * `vv` : replace the current cell with its evaluated value
+* `vm` : replace the cell with its evaluated value for all cells in the rectangle between the current cell and the marker
+* `v=` : flip the current cell between a label and a formula
+* `v+` : flip the cell between a label and a formula for all cells in the rectangle between the current cell and the marker
 * `` ` `` : Reset the screen (for systems that don't have SIGWINCH)
 
 The sheet automatically recalculates after you finish entering a label or formula, and when you paste a cell. If a cell references a cell that hasn't been computed yet, then that cell will be computed, unless we are already in the process of computing that cell (circular reference). This ought to remove most of the reasons for wanting to change the order of sheet computation (but, if you feel the need, it is very customizable).
